@@ -1,25 +1,154 @@
+// import { useEffect, useState } from 'react';
+// import { Route, Routes, useLocation, Navigate } from 'react-router-dom';
+// import Loader from './common/Loader';
+// import PageTitle from './components/PageTitle';
+// import SignIn from './pages/Authentication/SignIn';
+// import SignUp from './pages/Authentication/SignUp';
+// import ECommerce from './pages/Dashboard/ECommerce';
+// import Profile from './pages/Profile';
+// import DefaultLayout from './layout/DefaultLayout';
+// import History from './pages/Dashboard/History';
+// import Categories from './pages/Dashboard/Categories';
+// import CategoryProducts from './pages/Dashboard/CategoryProducts';
+// import Products from './pages/Dashboard/Products';
+// function App() {
+//   const [loading, setLoading] = useState<boolean>(true);
+//   const { pathname } = useLocation();
+
+//   useEffect(() => {
+//     window.scrollTo(0, 0);
+//   }, [pathname]);
+
+//   useEffect(() => {
+//     setTimeout(() => setLoading(false), 1000);
+//   }, []);
+
+//   const token = localStorage.getItem('token');
+
+//   const isAuthenticated = !!token;
+
+//   return loading ? (
+//     <Loader />
+//   ) : isAuthenticated ? (
+//     <DefaultLayout>
+//       <Routes>
+//         <Route
+//           path="/auth/signin"
+//           element={<Navigate to="/" />}
+//         />
+//         <Route
+//           path="/auth/signup"
+//           element={<Navigate to="/" />}
+//         />
+//         <Route
+//           index
+//           element={
+//             <>
+//               <ECommerce />
+//             </>
+//           }
+//         />
+
+//         <Route
+//           path="/history"
+//           element={
+//             <>
+//               <History />
+//             </>
+//           }
+//         />
+//         <Route
+//           path="/categories"
+//           element={
+//             <>
+//               <Categories />
+//             </>
+//           }
+//         />
+//         <Route
+//           path="/category/:id"
+//           element={
+//             <>
+//               <CategoryProducts />
+//             </>
+
+//           }
+//         />
+//         <Route
+//           path="/products"
+//           element={
+//             <>
+//               <Products />
+//             </>
+
+//           }
+//         />
+//         <Route
+//           path="/product/:id"
+//           element={
+//             <>
+//               <Products />
+//             </>
+
+//           }
+//         />
+//         <Route
+//           path="/profile"
+//           element={
+//             <>
+//               <Profile />
+//             </>
+//           }
+//         />
+
+//         <Route path="*" element={<Navigate to="/" />} />
+//       </Routes>
+//     </DefaultLayout>
+//   ) : (
+//     <Routes>
+//       <Route
+//         path="/auth/signin"
+//         element={
+//           <>
+//             <PageTitle title="Signin | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+//             <SignIn />
+//           </>
+//         }
+//       />
+//       <Route
+//         path="/auth/signup"
+//         element={
+//           <>
+//             <PageTitle title="Signup | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+//             <SignUp />
+//           </>
+//         }
+//       />
+//       <Route path="*" element={<Navigate to="/auth/signin" />} />
+//     </Routes>
+//   );
+// }
+
+// export default App;
 import { useEffect, useState } from 'react';
 import { Route, Routes, useLocation, Navigate } from 'react-router-dom';
-
 import Loader from './common/Loader';
 import PageTitle from './components/PageTitle';
 import SignIn from './pages/Authentication/SignIn';
 import SignUp from './pages/Authentication/SignUp';
-import Calendar from './pages/Calendar';
-import Chart from './pages/Chart';
 import ECommerce from './pages/Dashboard/ECommerce';
-import FormElements from './pages/Form/FormElements';
-import FormLayout from './pages/Form/FormLayout';
 import Profile from './pages/Profile';
-import Settings from './pages/Settings';
-import Tables from './pages/Tables';
-import Alerts from './pages/UiElements/Alerts';
-import Buttons from './pages/UiElements/Buttons';
 import DefaultLayout from './layout/DefaultLayout';
 import History from './pages/Dashboard/History';
 import Categories from './pages/Dashboard/Categories';
 import CategoryProducts from './pages/Dashboard/CategoryProducts';
 import Products from './pages/Dashboard/Products';
+import { AuthProvider, useAuth } from './pages/Authentication/AuthContext';
+import ProtectedRoute from './pages/Authentication/ProtectedRoute';
+import UserPage from './pages/Dashboard/UserPage';
+import UserAdminPage from './pages/Dashboard/AdminPage';
+// import { AuthProvider, useAuth } from './AuthContext';
+// import ProtectedRoute from './ProtectedRoute';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -33,200 +162,131 @@ function App() {
     setTimeout(() => setLoading(false), 1000);
   }, []);
 
-  // Get the token from localStorage or wherever you store it
-  const token = localStorage.getItem('token');
+  const { token } = useAuth();
 
-  // Define the routes that should not use DefaultLayout
-  const authRoutes = ['/auth/signin', '/auth/signup'];
-
-  // Determine if the current path is an authentication route
-  const isAuthRoute = authRoutes.includes(pathname);
-
-  // Check if the user is authenticated
   const isAuthenticated = !!token;
 
   return loading ? (
     <Loader />
-  ) : isAuthenticated ? (
-    // Render routes with DefaultLayout if the user is authenticated
-    <DefaultLayout>
+  ) : (
+    <AuthProvider>
       <Routes>
-        {/* Redirect any unknown routes to home */}
+        {/* Auth Routes */}
         <Route
           path="/auth/signin"
-          element={<Navigate to="/" />}
-        />
-        <Route
-          path="/auth/signup"
-          element={<Navigate to="/" />}
-        />
-        <Route
-          index
           element={
-            <>
-              <PageTitle title="eCommerce Dashboard | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <ECommerce />
-
+            isAuthenticated ? <Navigate to="/" /> : <>
+              <PageTitle title="Signin | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+              <SignIn />
             </>
           }
         />
         <Route
-          path="/calendar"
+          path="/auth/signup"
           element={
-            <>
-              <PageTitle title="Calendar | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <Calendar />
+            isAuthenticated ? <Navigate to="/" /> : <>
+              <PageTitle title="Signup | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+              <SignUp />
             </>
+          }
+        />
+
+        {/* Protected Routes */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'store_admin']}>
+              <DefaultLayout>
+                <ECommerce />
+              </DefaultLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/history"
           element={
-            <>
-              <PageTitle title="Calendar | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <History />
-            </>
+            <ProtectedRoute allowedRoles={['admin', 'user']}>
+              <DefaultLayout>
+                <History />
+              </DefaultLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/categories"
           element={
-            <>
-              <PageTitle title="Calendar | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <Categories />
-            </>
+            <ProtectedRoute allowedRoles={['admin']}>
+              <DefaultLayout>
+                <Categories />
+              </DefaultLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/category/:id"
           element={
-            <>
-              <PageTitle title="Calendar | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <CategoryProducts />
-            </>
-
+            <ProtectedRoute allowedRoles={['admin']}>
+              <DefaultLayout>
+                <CategoryProducts />
+              </DefaultLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/products"
           element={
-            <>
-              <PageTitle title="Calendar | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <Products />
-            </>
-
+            <ProtectedRoute allowedRoles={['admin', 'user']}>
+              <DefaultLayout>
+                <Products />
+              </DefaultLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/product/:id"
           element={
-            <>
-              <PageTitle title="Calendar | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <Products />
-            </>
-
+            <ProtectedRoute allowedRoles={['admin', 'user']}>
+              <DefaultLayout>
+                <Products />
+              </DefaultLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'user']}>
+              <DefaultLayout>
+                <UserPage />
+              </DefaultLayout>
+            </ProtectedRoute>
+          }
+          />
+                  <Route
+          path="/admins"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <DefaultLayout>
+                <UserAdminPage />
+              </DefaultLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/profile"
           element={
-            <>
-              <PageTitle title="Profile | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <Profile />
-            </>
+            <ProtectedRoute allowedRoles={['admin', 'user']}>
+              <DefaultLayout>
+                <Profile />
+              </DefaultLayout>
+            </ProtectedRoute>
           }
         />
-        <Route
-          path="/forms/form-elements"
-          element={
-            <>
-              <PageTitle title="Form Elements | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <FormElements />
-            </>
-          }
-        />
-        <Route
-          path="/forms/form-layout"
-          element={
-            <>
-              <PageTitle title="Form Layout | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <FormLayout />
-            </>
-          }
-        />
-        <Route
-          path="/tables"
-          element={
-            <>
-              <PageTitle title="Tables | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <Tables />
-            </>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <>
-              <PageTitle title="Settings | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <Settings />
-            </>
-          }
-        />
-        <Route
-          path="/chart"
-          element={
-            <>
-              <PageTitle title="Basic Chart | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <Chart />
-            </>
-          }
-        />
-        <Route
-          path="/ui/alerts"
-          element={
-            <>
-              <PageTitle title="Alerts | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <Alerts />
-            </>
-          }
-        />
-        <Route
-          path="/ui/buttons"
-          element={
-            <>
-              <PageTitle title="Buttons | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <Buttons />
-            </>
-          }
-        />
-        {/* Redirect any unknown routes to home */}
-        <Route path="*" element={<Navigate to="/" />} />
+
+        {/* Default to signin if no match */}
+        <Route path="*" element={<Navigate to="/auth/signin" />} />
       </Routes>
-    </DefaultLayout>
-  ) : (
-    // Render routes without DefaultLayout if the user is not authenticated
-    <Routes>
-      <Route
-        path="/auth/signin"
-        element={
-          <>
-            <PageTitle title="Signin | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-            <SignIn />
-          </>
-        }
-      />
-      <Route
-        path="/auth/signup"
-        element={
-          <>
-            <PageTitle title="Signup | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-            <SignUp />
-          </>
-        }
-      />
-      {/* Redirect to sign-in if trying to access protected routes */}
-      <Route path="*" element={<Navigate to="/auth/signin" />} />
-    </Routes>
+    </AuthProvider>
   );
 }
 

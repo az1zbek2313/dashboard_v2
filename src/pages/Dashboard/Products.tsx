@@ -59,7 +59,7 @@ const Products: React.FC = () => {
         }
     };
     useEffect(() => {
-      
+
 
         const fetchCategories = async () => {
             try {
@@ -144,11 +144,15 @@ const Products: React.FC = () => {
         data.append('count', formData.count.toString());
         data.append('category_id', formData.category_id); // Append selected category ID
         data.append('store_id', "66bb98daa9fe5a8bb37a6c9a"); // Append selected category ID
+        if (formData.images && formData.images.length > 0) {
+            formData.images.forEach((image: any) => {
+                data.append('images', image); // Rasmlarni oddiy `images` nomi bilan yuborish
+            });
+        }
+        // formData.images.forEach((image: any) => {
+        //     data.append('images', image); // Rasmlarni to'g'ridan-to'g'ri `images` sifatida qo'shish
+        // });
 
-        // Add images to FormData
-        formData.images.forEach((image: any) => {
-            data.append('images', image);
-        });
         for (let pair of data.entries()) {
             console.log(`${pair[0]}: ${pair[1]}`);
         }
@@ -211,12 +215,12 @@ const Products: React.FC = () => {
                         <p className="text-gray-600">{product.description.uz}</p>
                         <p className="text-lg font-bold">{`Price: $${product.price}`}</p>
                         {product.images.length > 0 && (
-    <img
-        src={'https://surprize.uz' + product.images[0]}
-        alt={product.name.uz}
-        className="w-full h-64 rounded mt-2 object-cover" // Tasvirning kengligi va balandligi 256px bo'ladi
-    />
-)}
+                            <img
+                                src={'https://surprize.uz' + product.images[0]}
+                                alt={product.name.uz}
+                                className="w-full h-64 rounded mt-2 object-cover" // Tasvirning kengligi va balandligi 256px bo'ladi
+                            />
+                        )}
 
                         <div className="mt-2">
                             <span className="text-sm text-gray-500">{`Available Count: ${product.count}`}</span>

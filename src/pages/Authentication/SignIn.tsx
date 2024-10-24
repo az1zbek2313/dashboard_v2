@@ -4,10 +4,12 @@ import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import LogoDark from '../../images/logo/logo-dark.svg';
 import Logo from '../../images/logo/logo.svg';
 import axiosInstance from '../../Api/api';
+import { useAuth } from './AuthContext';
 
 const SignIn: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -16,15 +18,11 @@ const SignIn: React.FC = () => {
       const res = await axiosInstance.post('login', {
         phone,
         password,
+
       });
-
-      // Backend-dan kelgan ma'lumotlar
-      const { token } = res.data;
-
-      // Tokenni saqlash
-      localStorage.setItem('token', token);
-
-      // Foydalanuvchini ECommerce sahifasiga yo'naltirish
+      const { token, adminType, data: { store } } = res.data;
+      
+      login(token, adminType, store);
       navigate('/');
     } catch (error) {
       console.error('Login failed', error);
