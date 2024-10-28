@@ -43,12 +43,12 @@ const UserTable: React.FC<UserTableProps> = ({ users, onEdit, onDelete }) => {
                 <td className="p-2 text-center text-sm text-gray-700 dark:text-gray-300">{user.favorite.length}</td>
                 <td className="p-2 text-center text-sm text-gray-700 dark:text-gray-300">{user.orders.length}</td>
                 <td className="p-2 text-center text-sm text-gray-700 dark:text-gray-300">
-                  <button
+                  {/* <button
                     className="text-blue-600 hover:underline mr-2"
                     onClick={() => onEdit(user)}
                   >
                     Edit
-                  </button>
+                  </button> */}
                   <button
                     className="text-red-600 hover:underline"
                     onClick={() => onDelete(user._id)}

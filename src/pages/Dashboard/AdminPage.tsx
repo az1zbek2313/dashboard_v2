@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../Authentication/AuthContext';
-import UserTable from '../../components/Users/UserTable';
 import AdminTable from '../../components/Users/AdminTable';
 
 interface Admin {
@@ -37,18 +36,25 @@ const UserAdminPage: React.FC = () => {
 
     const handleSaveAdmin = async (admin: Admin) => {
         try {
-            const newAdmin = {
+            const adminData = {
                 name: admin.name,
                 role: admin.role,
                 phone: admin.phone,
                 password: admin.password,
             };
-            console.log('newAdmin :', newAdmin);
-
-            let res = await axios.post('https://surprize.uz/api/admin', newAdmin, {
-                headers: { token, 'Content-Type': 'application/json' }, // Oddiy bodyda yuborish
-            });
-
+    
+            if (admin._id) {
+                // Agar admin ID mavjud bo'lsa, yangilash uchun PUT metodini ishlatamiz
+                await axios.put(`https://surprize.uz/api/admin/${admin._id}`, adminData, {
+                    headers: { token, 'Content-Type': 'application/json' }, // PUT requestda yuborish
+                });
+            } else {
+                // Agar admin ID mavjud bo'lmasa, yangi admin qo'shish uchun POST metodini ishlatamiz
+                await axios.post('https://surprize.uz/api/admin', adminData, {
+                    headers: { token, 'Content-Type': 'application/json' }, // POST requestda yuborish
+                });
+            }
+    
             setCurrentAdmin(undefined);
             setModalOpen(false);
             fetchAdmins(); // Yangilangan adminlar ro'yxatini olish
@@ -56,6 +62,7 @@ const UserAdminPage: React.FC = () => {
             console.error('Error saving admin:', error);
         }
     };
+    
 
     const handleDeleteAdmin = async (id: string) => {
         try {

@@ -190,7 +190,6 @@ const UserPage: React.FC = () => {
                                     value={currentUser?.birthday || ''}
                                     onChange={(e) => setCurrentUser({ ...currentUser, birthday: e.target.value })}
                                     className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
-                                    required
                                 />
                             </div>
 

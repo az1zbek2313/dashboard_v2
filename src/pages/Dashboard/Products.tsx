@@ -31,6 +31,8 @@ interface Category {
 }
 
 const Products: React.FC = () => {
+
+
     const [products, setProducts] = useState<Product[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
@@ -92,17 +94,35 @@ const Products: React.FC = () => {
             }));
         }
     };
-
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = Array.from(e.target.files || []);
-        const imageUrls = files.map((file) => URL.createObjectURL(file));
+        const files = e.target.files;
+        if (files) {
+            const imageUrls = createImageUrls(Array.from(files));
+            appendImages(imageUrls);
+        }
+    };
 
-        // Update to append new images
-        setFormData((prevData: any) => ({
+    const createImageUrls = (files: File[]): string[] => {
+        return files.map((file) => URL.createObjectURL(file));
+    };
+
+    const appendImages = (newImages: string[]) => {
+        setFormData((prevData) => ({
             ...prevData,
-            images: [...prevData.images, ...imageUrls]
+            images: [...prevData.images, ...newImages],
         }));
     };
+
+    // const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const files = Array.from(e.target.files || []);
+    //     const imageUrls = files.map((file) => URL.createObjectURL(file));
+
+    //     // Update to append new images
+    //     setFormData((prevData: any) => ({
+    //         ...prevData,
+    //         images: [...prevData.images, ...imageUrls]
+    //     }));
+    // };
 
     const openModal = (product?: Product) => {
         if (product) {
@@ -144,15 +164,9 @@ const Products: React.FC = () => {
         data.append('count', formData.count.toString());
         data.append('category_id', formData.category_id); // Append selected category ID
         data.append('store_id', "66bb98daa9fe5a8bb37a6c9a"); // Append selected category ID
-        if (formData.images && formData.images.length > 0) {
-            formData.images.forEach((image: any) => {
-                data.append('images', image); // Rasmlarni oddiy `images` nomi bilan yuborish
-            });
-        }
-        // formData.images.forEach((image: any) => {
-        //     data.append('images', image); // Rasmlarni to'g'ridan-to'g'ri `images` sifatida qo'shish
-        // });
-
+        formData.images.forEach((image) => {
+            data.append('images', image); // Append each image URL (if it’s a file) or Blob object
+        });
         for (let pair of data.entries()) {
             console.log(`${pair[0]}: ${pair[1]}`);
         }
@@ -217,7 +231,7 @@ const Products: React.FC = () => {
                         {product.images.length > 0 && (
                             <img
                                 src={'https://surprize.uz' + product.images[0]}
-                                alt={product.name.uz}
+                                alt={product.name?.uz}
                                 className="w-full h-64 rounded mt-2 object-cover" // Tasvirning kengligi va balandligi 256px bo'ladi
                             />
                         )}
@@ -251,6 +265,8 @@ const Products: React.FC = () => {
                                 value={formData.name.uz}
                                 onChange={handleChange}
                                 className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
+                                required
+
                             />
                         </div>
                         <div>
@@ -260,6 +276,7 @@ const Products: React.FC = () => {
                                 name="name.ru"
                                 value={formData.name.ru}
                                 onChange={handleChange}
+                                required
                                 className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
                             />
                         </div>
@@ -268,6 +285,7 @@ const Products: React.FC = () => {
                             <textarea
                                 name="description.uz"
                                 value={formData.description.uz}
+                                required
                                 onChange={handleChange}
                                 className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
                             />
@@ -276,6 +294,7 @@ const Products: React.FC = () => {
                             <label className="block mb-2">Description (RU):</label>
                             <textarea
                                 name="description.ru"
+                                required
                                 value={formData.description.ru}
                                 onChange={handleChange}
                                 className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
@@ -284,9 +303,10 @@ const Products: React.FC = () => {
                         <div>
                             <label className="block mb-2">Price:</label>
                             <input
-                                type="number"
+                                type="text"
+                                required
                                 name="price"
-                                value={formData.price}
+                                // value={formData.price}
                                 onChange={handleChange}
                                 className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
                             />
@@ -294,9 +314,10 @@ const Products: React.FC = () => {
                         <div>
                             <label className="block mb-2">Count:</label>
                             <input
-                                type="number"
+                                type="text"
+                                required
                                 name="count"
-                                value={formData.count}
+                                // value={formData.count}
                                 onChange={handleChange}
                                 className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
                             />
@@ -304,6 +325,7 @@ const Products: React.FC = () => {
                         <div>
                             <label className="block mb-2">Category:</label>
                             <select
+                                required
                                 name="category_id"
                                 value={formData.category_id}
                                 onChange={handleChange}
@@ -321,6 +343,7 @@ const Products: React.FC = () => {
                             <label className="block mb-2">Images:</label>
                             <input
                                 type="file"
+                                required
                                 accept="image/*"
                                 multiple
                                 onChange={handleImageChange}

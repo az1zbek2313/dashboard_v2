@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useAuth } from '../Authentication/AuthContext';
 
 interface Product {
   _id: string;
@@ -15,22 +16,22 @@ interface Product {
 const History: React.FC = () => {
   const [data, setData] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const getToken = () => localStorage.getItem('token');
+  const { token } = useAuth();
 
+  const fetchData = async () => {
+    try {
+      const response = await axios.get('https://surprize.uz/api/deliver/orders', {
+        headers: { token }
+      });
+      console.log('response.data :', response.data);
+      setData(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('https://surprize.uz/api/deliver/orders', {
-          headers: { token: getToken() }
-        });
-        setData(response.data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        setLoading(false);
-      }
-    };
-
     fetchData();
   }, []);
 
