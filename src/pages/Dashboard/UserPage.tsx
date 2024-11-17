@@ -160,7 +160,7 @@ const UserPage: React.FC = () => {
                             <div className="mb-4">
                                 <label className="block mb-1 dark:text-gray-300">Password:</label>
                                 <input
-                                    type="password"
+                                    type="text"
                                     name="password"
                                     value={currentUser?.password || ''}
                                     onChange={(e) => setCurrentUser({ ...currentUser, password: e.target.value })}

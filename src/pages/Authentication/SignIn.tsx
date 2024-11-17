@@ -23,7 +23,7 @@ const SignIn: React.FC = () => {
       const { token, adminType, data: { store } } = res.data;
       
       login(token, adminType, store);
-      navigate('/');
+      navigate(adminType =="store_admin"?"/store":"/");
     } catch (error) {
       console.error('Login failed', error);
     }

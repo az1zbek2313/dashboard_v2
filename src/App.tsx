@@ -147,6 +147,11 @@ import { AuthProvider, useAuth } from './pages/Authentication/AuthContext';
 import ProtectedRoute from './pages/Authentication/ProtectedRoute';
 import UserPage from './pages/Dashboard/UserPage';
 import UserAdminPage from './pages/Dashboard/AdminPage';
+import UserStore from './pages/Dashboard/UserStore';
+import StoreProduct from './pages/Dashboard/StoreProduct';
+import CategoryFilter from './pages/Dashboard/CategoryFilter';
+import StoreById from './pages/Dashboard/StoreById';
+import UserById from './pages/Dashboard/UserById';
 // import { AuthProvider, useAuth } from './AuthContext';
 // import ProtectedRoute from './ProtectedRoute';
 
@@ -195,9 +200,30 @@ function App() {
         <Route
           path="/"
           element={
-            <ProtectedRoute allowedRoles={['admin', 'store_admin']}>
+            <ProtectedRoute allowedRoles={['admin']}>
               <DefaultLayout>
                 <ECommerce />
+              </DefaultLayout>
+            </ProtectedRoute>
+          }
+          />
+             <Route
+          path="/storeid/:id"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <DefaultLayout>
+                {/* <ECommerce /> */}
+                <StoreById/>
+              </DefaultLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/store"
+          element={
+            <ProtectedRoute allowedRoles={['store_admin']}>
+              <DefaultLayout>
+                <UserStore />
               </DefaultLayout>
             </ProtectedRoute>
           }
@@ -205,7 +231,7 @@ function App() {
         <Route
           path="/history"
           element={
-            <ProtectedRoute allowedRoles={['admin', 'user']}>
+            <ProtectedRoute allowedRoles={['admin']}>
               <DefaultLayout>
                 <History />
               </DefaultLayout>
@@ -235,7 +261,7 @@ function App() {
         <Route
           path="/products"
           element={
-            <ProtectedRoute allowedRoles={['admin', 'user']}>
+            <ProtectedRoute allowedRoles={['admin']}>
               <DefaultLayout>
                 <Products />
               </DefaultLayout>
@@ -243,9 +269,19 @@ function App() {
           }
         />
         <Route
+          path="/user/product"
+          element={
+            <ProtectedRoute allowedRoles={['store_admin']}>
+              <DefaultLayout>
+                <StoreProduct />
+              </DefaultLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/product/:id"
           element={
-            <ProtectedRoute allowedRoles={['admin', 'user']}>
+            <ProtectedRoute allowedRoles={['admin']}>
               <DefaultLayout>
                 <Products />
               </DefaultLayout>
@@ -255,14 +291,24 @@ function App() {
         <Route
           path="/users"
           element={
-            <ProtectedRoute allowedRoles={['admin', 'user']}>
+            <ProtectedRoute allowedRoles={['admin']}>
               <DefaultLayout>
                 <UserPage />
               </DefaultLayout>
             </ProtectedRoute>
           }
           />
-                  <Route
+              <Route
+          path="/userbyid/:id"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <DefaultLayout>
+                <UserById />
+              </DefaultLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/admins"
           element={
             <ProtectedRoute allowedRoles={['admin']}>
@@ -275,15 +321,23 @@ function App() {
         <Route
           path="/profile"
           element={
-            <ProtectedRoute allowedRoles={['admin', 'user']}>
+            <ProtectedRoute allowedRoles={['admin']}>
               <DefaultLayout>
                 <Profile />
               </DefaultLayout>
             </ProtectedRoute>
           }
         />
-
-        {/* Default to signin if no match */}
+        <Route
+          path="/category-filter"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <DefaultLayout>
+                <CategoryFilter />
+              </DefaultLayout>
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<Navigate to="/auth/signin" />} />
       </Routes>
     </AuthProvider>

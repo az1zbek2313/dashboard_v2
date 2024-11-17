@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import SidebarLinkGroup from './SidebarLinkGroup';
 import Logo from '../../images/logo/logo.svg';
+import { useAuth } from '../../pages/Authentication/AuthContext';
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -9,6 +10,9 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
+
+  const { role } = useAuth(); // AuthContext'dan rolni olish
+
   const location = useLocation();
   const { pathname } = location;
 
@@ -19,6 +23,22 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const [sidebarExpanded, setSidebarExpanded] = useState(
     storedSidebarExpanded === null ? false : storedSidebarExpanded === 'true'
   );
+
+  // Ruxsat etilgan yo'nalishlar ro'yxatini aniqlash
+  const routes = [
+    { path: '/', label: 'Stores', roles: ['admin'] },
+    { path: '/store', label: 'User stores', roles: ['store_admin'] },
+    { path: '/user/product', label: 'Products', roles: ['store_admin'] },
+    { path: '/history', label: 'History', roles: ['admin'] },
+    { path: '/categories', label: 'Category', roles: ['admin'] },
+    { path: '/products', label: 'Products', roles: ['admin'] },
+    { path: '/users', label: 'Users', roles: ['admin'] },
+    { path: '/admins', label: 'Admins', roles: ['admin'] },
+    { path: '/category-filter', label: 'Filter category', roles: ['admin'] },
+  ];
+
+  // Foydalanuvchining roli asosida yo'nalishlarni filtrlash
+  const filteredRoutes = routes.filter(route => route.roles.includes(role));
 
   // close on click outside
   useEffect(() => {
@@ -94,79 +114,19 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
               MENU
             </h3>
-
             <ul className="mb-6 flex flex-col gap-1.5">
-              <SidebarLinkGroup
-                activeCondition={
-                  pathname === '/' || pathname.includes('dashboard')
-                }
-              >
-                {(handleClick, open) => {
-                  return (
-                    <React.Fragment>
-                      <NavLink
-                        to="/"
-                        className={({ isActive }) =>
-                          `group relative flex items-center gap-2.5 rounded-md px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${isActive ? 'bg-graydark dark:bg-meta-4 !text-white' : ''
-                          }`
-                        }
-                      >
-                        Stores
-                      </NavLink>
-
-                      <NavLink
-                        to="/history"
-                        className={({ isActive }) =>
-                          `group relative flex items-center gap-2.5 rounded-md px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${isActive ? 'bg-graydark dark:bg-meta-4 !text-white' : ''
-                          }`
-                        }
-                      >
-                        History
-                      </NavLink>
-
-                      <NavLink
-                        to="/categories"
-                        className={({ isActive }) =>
-                          `group relative flex items-center gap-2.5 rounded-md px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${isActive ? 'bg-graydark dark:bg-meta-4 !text-white' : ''
-                          }`
-                        }
-                      >
-                        Category
-                      </NavLink>
-
-                      <NavLink
-                        to="/products"
-                        className={({ isActive }) =>
-                          `group relative flex items-center gap-2.5 rounded-md px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${isActive ? 'bg-graydark dark:bg-meta-4 !text-white' : ''
-                          }`
-                        }
-                      >
-                        Products
-                      </NavLink>
-
-                      <NavLink
-                        to="/users"
-                        className={({ isActive }) =>
-                          `group relative flex items-center gap-2.5 rounded-md px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${isActive ? 'bg-graydark dark:bg-meta-4 !text-white' : ''
-                          }`
-                        }
-                      >
-                        Users
-                      </NavLink>
-
-                      <NavLink
-                        to="/admins"
-                        className={({ isActive }) =>
-                          `group relative flex items-center gap-2.5 rounded-md px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${isActive ? 'bg-graydark dark:bg-meta-4 !text-white' : ''
-                          }`
-                        }
-                      >
-                        Admins
-                      </NavLink>
-                    </React.Fragment>
-                  );
-                }}
-              </SidebarLinkGroup>
+              {filteredRoutes.map((route) => (
+                <NavLink
+                  key={route.path}
+                  to={route.path}
+                  className={({ isActive }) =>
+                    `group relative flex items-center gap-2.5 rounded-md px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${isActive ? 'bg-graydark dark:bg-meta-4 !text-white' : ''
+                    }`
+                  }
+                >
+                  {route.label}
+                </NavLink>
+              ))}
             </ul>
           </div>
         </nav>

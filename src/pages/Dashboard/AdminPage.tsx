@@ -141,6 +141,8 @@ const UserAdminPage: React.FC = () => {
                                 <input
                                     type="text"
                                     name="phone"
+                                    minLength={10}
+                                    maxLength={15}
                                     value={currentAdmin?.phone || ''}
                                     onChange={(e) => setCurrentAdmin({ ...currentAdmin, phone: e.target.value })}
                                     className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
@@ -150,7 +152,7 @@ const UserAdminPage: React.FC = () => {
                             <div className="mb-4">
                                 <label className="block mb-1 dark:text-gray-300">Password:</label>
                                 <input
-                                    type="password"
+                                    type="text"
                                     name="password"
                                     value={currentAdmin?.password || ''}
                                     onChange={(e) => setCurrentAdmin({ ...currentAdmin, password: e.target.value })}

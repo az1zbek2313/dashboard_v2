@@ -23,7 +23,7 @@ const History: React.FC = () => {
       const response = await axios.get('https://surprize.uz/api/deliver/orders', {
         headers: { token }
       });
-      console.log('response.data :', response.data);
+      console.log('response.data History :', response.data);
       setData(response.data);
       setLoading(false);
     } catch (error) {

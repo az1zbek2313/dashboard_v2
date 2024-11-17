@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 interface Location {
   name: string;
@@ -43,18 +44,20 @@ const UserTable: React.FC<UserTableProps> = ({ users, onEdit, onDelete }) => {
                 <td className="p-2 text-center text-sm text-gray-700 dark:text-gray-300">{user.favorite.length}</td>
                 <td className="p-2 text-center text-sm text-gray-700 dark:text-gray-300">{user.orders.length}</td>
                 <td className="p-2 text-center text-sm text-gray-700 dark:text-gray-300">
-                  {/* <button
-                    className="text-blue-600 hover:underline mr-2"
-                    onClick={() => onEdit(user)}
-                  >
-                    Edit
-                  </button> */}
+
                   <button
-                    className="text-red-600 hover:underline"
+                    className="text-red-600 hover:underline mr-2 dark:text-red-400"
                     onClick={() => onDelete(user._id)}
                   >
                     Delete
                   </button>
+                  <Link to={`/userbyid/${user._id}`}>
+                  <button
+                    className="text-sm font-medium green-red-600 hover:underline dark:text-green-400"
+                  >
+                    View
+                  </button>
+                  </Link>
                 </td>
               </tr>
             ))}

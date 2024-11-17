@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
 
 interface Store {
   _id: string;
@@ -24,7 +23,7 @@ interface TableOneProps {
   getData: (updatedStore: Store) => void; // Add the callback prop
 }
 
-const TableOne: React.FC<TableOneProps> = ({ storeData, onUpdateStore, getData }) => {
+const UserStoreAdmin: React.FC<TableOneProps> = ({ storeData, onUpdateStore, getData }) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingStore, setEditingStore] = useState<Store | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -116,7 +115,7 @@ const TableOne: React.FC<TableOneProps> = ({ storeData, onUpdateStore, getData }
       {!isEditMode ?
         (
           <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-            <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">Do'konlar</h4>
+            <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">Do'kon</h4>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead className="bg-gray-200 dark:bg-gray-800">
@@ -126,8 +125,7 @@ const TableOne: React.FC<TableOneProps> = ({ storeData, onUpdateStore, getData }
                     <th className="p-2 text-center text-sm font-medium uppercase text-gray-700 dark:text-gray-300">Baholash</th>
                     <th className="p-2 text-center text-sm font-medium uppercase text-gray-700 dark:text-gray-300 sm:table-cell">Manzil</th>
                     <th className="p-2 text-center text-sm font-medium uppercase text-gray-700 dark:text-gray-300 sm:table-cell">Update</th>
-                    <th className="p-2 text-center text-sm font-medium uppercase text-gray-700 dark:text-gray-300">Delete</th>
-                    <th className="p-2 text-center text-sm font-medium uppercase text-gray-700 dark:text-gray-300">Action</th>
+                    {/* <th className="p-2 text-center text-sm font-medium uppercase text-gray-700 dark:text-gray-300">Delete</th> */}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -143,14 +141,9 @@ const TableOne: React.FC<TableOneProps> = ({ storeData, onUpdateStore, getData }
                       <td className="p-2 text-center sm:table-cell whitespace-nowrap">
                         <button className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400" onClick={() => handleUpdateClick(store)}>Update</button>
                       </td>
-                      <td className="p-2 text-center whitespace-nowrap">
-                        <button className="text-sm font-medium text-red-600 hover:underline dark:text-red-400" onClick={() => handleDeleteClick(store._id)}>Delete</button>
-                      </td>
-                      <td className="p-2 text-center whitespace-nowrap">
-                        <Link to={`/storeid/{${store._id}}`}>
-                          <button className="text-sm font-medium green-red-600 hover:underline dark:text-green-400">View</button>
-                        </Link>
-                      </td>
+                      {/* <td className="p-2 text-center whitespace-nowrap">
+              <button className="text-sm font-medium text-red-600 hover:underline dark:text-red-400" onClick={() => handleDeleteClick(store._id)}>Delete</button>
+            </td> */}
                     </tr>
                   ))}
                 </tbody>
@@ -238,4 +231,4 @@ const TableOne: React.FC<TableOneProps> = ({ storeData, onUpdateStore, getData }
   );
 };
 
-export default TableOne;
+export default UserStoreAdmin;
