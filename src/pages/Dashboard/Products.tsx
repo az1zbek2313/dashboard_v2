@@ -59,7 +59,6 @@ const Products: React.FC = () => {
         try {
             const response = await axios.get('https://surprize.uz/api/product');
             setProducts(response.data);
-            console.log('response.data :', response.data);
         } catch (err) {
             setError('Failed to fetch products');
         } finally {
@@ -71,9 +70,8 @@ const Products: React.FC = () => {
 
         const fetchCategories = async () => {
             try {
-                const response = await axios.get('https://surprize.uz/api/category');
+                const response = await axios.get('https://surprize.uz/api/sub-category');
                 setCategories(response.data);
-                console.log('response.data :', response.data);
             } catch (err) {
                 setError('Failed to fetch categories');
             }
@@ -355,12 +353,40 @@ const Products: React.FC = () => {
                                 onChange={handleChange}
                                 className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
                             >
-                                <option value="" disabled>Select Category</option>
-                                {categories.map(category => (
-                                    <option key={category._id} value={category._id}>
-                                        {category.name?.uz || category.name?.ru}
-                                    </option>
-                                ))}
+                                <option value="">Select Category</option>
+
+                                {/* Male Categories */}
+                                <optgroup label="Male">
+                                    {categories
+                                        .filter(category => category.gender.includes("male"))
+                                        .map(category => (
+                                            <option key={category._id} value={category._id}>
+                                                {category.name?.uz}
+                                            </option>
+                                        ))}
+                                </optgroup>
+
+                                {/* Female Categories */}
+                                <optgroup label="Female">
+                                    {categories
+                                        .filter(category => category.gender.includes("female"))
+                                        .map(category => (
+                                            <option key={category._id} value={category._id}>
+                                                {category.name?.uz}
+                                            </option>
+                                        ))}
+                                </optgroup>
+
+                                {/* Kids Categories */}
+                                <optgroup label="Kids">
+                                    {categories
+                                        .filter(category => category.gender.includes("kids"))
+                                        .map(category => (
+                                            <option key={category._id} value={category._id}>
+                                                {category.name?.uz}
+                                            </option>
+                                        ))}
+                                </optgroup>
                             </select>
                         </div>
                         <div>
