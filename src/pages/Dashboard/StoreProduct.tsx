@@ -32,11 +32,8 @@ interface Category {
 }
 
 const StoreProduct: React.FC = () => {
-
-
     const [products, setProducts] = useState<Product[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
-    const [store, setStore] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -229,7 +226,7 @@ const StoreProduct: React.FC = () => {
                             <img
                                 src={'https://surprize.uz' + product.images[0]}
                                 alt={product.name?.uz}
-                                className="w-full h-64 rounded mt-2 object-cover" // Tasvirning kengligi va balandligi 256px bo'ladi
+                                className="w-full h-64 rounded mt-2 object-cover"
                             />
                         )}
 
@@ -368,6 +365,42 @@ const StoreProduct: React.FC = () => {
                             </select>
                         </div>
 
+                        <div>
+                            <label className="block mb-2">Images:</label>
+                            <input
+                                type="file"
+                                required
+                                accept="image/*"
+                                multiple
+                                onChange={handleImageChange}
+                                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
+                            />
+                        </div>
+                        <div className="mt-2">
+                            <h3 className="text-lg font-semibold">Selected Images:</h3>
+                            <div className="flex flex-wrap mt-2">
+                                {formData.images.map((image: string, index: number) => (
+                                    <img key={index} src={image} alt={`Selected ${index}`} className="w-16 h-16 object-cover mr-2" />
+                                ))}
+                            </div>
+                        </div>
+                        <div className="flex justify-end mt-4">
+                            <button type="button" onClick={closeModal} className="bg-gray-300 dark:bg-gray-600 p-2 rounded mr-2">
+                                Cancel
+                            </button>
+                            <button type="submit" className="bg-blue-500 dark:bg-blue-600 text-white p-2 rounded">
+                                {selectedProduct ? 'Update Product' : 'Add Product'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default StoreProduct;
+
 
 
 
@@ -405,38 +438,3 @@ const StoreProduct: React.FC = () => {
                                 ))}
                             </select>
                         </div> */}
-                        <div>
-                            <label className="block mb-2">Images:</label>
-                            <input
-                                type="file"
-                                required
-                                accept="image/*"
-                                multiple
-                                onChange={handleImageChange}
-                                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
-                            />
-                        </div>
-                        <div className="mt-2">
-                            <h3 className="text-lg font-semibold">Selected Images:</h3>
-                            <div className="flex flex-wrap mt-2">
-                                {formData.images.map((image: string, index: number) => (
-                                    <img key={index} src={image} alt={`Selected ${index}`} className="w-16 h-16 object-cover mr-2" />
-                                ))}
-                            </div>
-                        </div>
-                        <div className="flex justify-end mt-4">
-                            <button type="button" onClick={closeModal} className="bg-gray-300 dark:bg-gray-600 p-2 rounded mr-2">
-                                Cancel
-                            </button>
-                            <button type="submit" className="bg-blue-500 dark:bg-blue-600 text-white p-2 rounded">
-                                {selectedProduct ? 'Update Product' : 'Add Product'}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
-        </div>
-    );
-};
-
-export default StoreProduct;

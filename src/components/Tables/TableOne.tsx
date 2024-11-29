@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import defaultImage from '../../images/Logotip/SVG/icon.svg';
@@ -33,6 +33,8 @@ const TableOne: React.FC<TableOneProps> = ({
   getData,
   isLoading,
 }) => {
+  const [isSearch, setIsSearch] = useState(storeData);
+  const searchRef = useRef();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isAction, setIsAction] = useState('');
   const navigate = useNavigate();
@@ -88,6 +90,21 @@ const TableOne: React.FC<TableOneProps> = ({
     }
   };
 
+  function handleSearch(data:Store[]) {
+    const upperSearch = searchRef.current?.value.toUpperCase();
+    if (upperSearch) {
+      const filtered = data.filter(store => store.name.uz.toUpperCase().includes(upperSearch));
+      setIsSearch(filtered);
+    } else {
+      setIsSearch(data)
+    }
+  }
+
+  useEffect(() => {
+    setIsSearch(storeData);
+  }, [storeData]);
+  
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -138,10 +155,45 @@ const TableOne: React.FC<TableOneProps> = ({
           }}
           className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1"
         >
-          <h4 className="mb-6 text-3xl font-bold text-black/70">Do'konlar</h4>
+          <div className="flex justify-between w-full item-center">
+            <h4 className="mb-6 text-3xl font-bold text-black/70">Do'konlar</h4>
+            <form className="">
+              <label htmlFor="simple-search" className="sr-only">
+                Search
+              </label>
+              <div className="relative w-full">
+                <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                  <svg
+                    className="w-4 h-4 text-gray-500"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 18 20"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      stroke-width="2"
+                      d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2"
+                    />
+                  </svg>
+                </div>
+                <input
+                  type="search"
+                  ref={searchRef}
+                  onChange={() => handleSearch(storeData)}
+                  id="simple-search"
+                  className="bg-gray-50 border focus:outline-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5"
+                  placeholder="Search store name..."
+                  required
+                />
+              </div>
+            </form>
+          </div>
           {!isLoading ? (
             <div className="overflow-x-auto">
-              {storeData ? (
+              {isSearch.length ? (
                 <table className="min-w-full divide-y">
                   <thead className="border-b-[1.5px]">
                     <tr>
@@ -163,7 +215,7 @@ const TableOne: React.FC<TableOneProps> = ({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 ">
-                    {storeData.map((store) => (
+                    {isSearch.map((store) => (
                       <tr
                         onMouseLeave={() => {
                           setIsAction('');

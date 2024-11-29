@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import notfound from '../../images/notfound/notfound.png';
-
 
 interface Category {
   name: {
@@ -22,12 +21,15 @@ interface ApiResponse {
 
 const Categories: React.FC = () => {
   const [isAction, setIsAction] = useState('');
+  const searchRef = useRef();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [categories, setCategories] = useState<ApiResponse>({
     male: [],
     female: [],
     kids: [],
   });
+  const [isSearch, setIsSearch] = useState<ApiResponse>(categories);
+
   const [newCategory, setNewCategory] = useState({
     uz: '',
     ru: '',
@@ -57,6 +59,31 @@ const Categories: React.FC = () => {
     setIsLoading(true);
     fetchCategories();
   }, []);
+
+  function handleSearch(data: ApiResponse) {
+    const upperSearch = searchRef.current?.value.toUpperCase();
+    if (upperSearch) {
+      const filtered: ApiResponse = {
+        male: data.male.filter((category) =>
+          category.name.uz.toUpperCase().includes(upperSearch)
+        ),
+        female: data.female.filter((category) =>
+          category.name.uz.toUpperCase().includes(upperSearch)
+        ),
+        kids: data.kids.filter((category) =>
+          category.name.uz.toUpperCase().includes(upperSearch)
+        ),
+      };
+      setIsSearch(filtered);
+    } else {
+      setIsSearch(data);
+    }
+  }
+  
+
+  useEffect(() => {
+    setIsSearch(categories);
+  }, [categories]);
 
   // Create category
   const createCategory = () => {
@@ -139,16 +166,51 @@ const Categories: React.FC = () => {
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:bg-gray-800 dark:border-gray-700">
-      <div className="flex justify-between">
-        <h1 className="text-3xl font-bold mb-6 text-black/70">Categories</h1>
-        <button
-          onClick={() => {
-            setIsModalOpenTwo(true);
-          }}
-          className="bg-blue-500 text-white h-fit py-1 px-2 rounded dark:bg-blue-700"
-        >
-          Add Category
-        </button>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-black/70">Categories</h1>
+        <div className="flex gap-2 items-center">
+          <form className="">
+            <label htmlFor="simple-search" className="sr-only">
+              Search
+            </label>
+            <div className="relative w-full">
+              <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                <svg
+                  className="w-4 h-4 text-gray-500"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 18 20"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    stroke-width="2"
+                    d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2"
+                  />
+                </svg>
+              </div>
+              <input
+                type="search"
+                ref={searchRef}
+                onChange={() => handleSearch(categories)}
+                id="simple-search"
+                className="bg-gray-50 border focus:outline-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5"
+                placeholder="Search category name..."
+                required
+              />
+            </div>
+          </form>
+          <button
+            onClick={() => {
+              setIsModalOpenTwo(true);
+            }}
+            className="bg-blue-500 text-white h-fit py-2 px-2 rounded-lg"
+          >
+            Add Category
+          </button>
+        </div>
       </div>
 
       {isModalOpenTwo && (
@@ -219,127 +281,113 @@ const Categories: React.FC = () => {
       )}
 
       <div>
-      {!isLoading ? (
-        <div className="overflow-x-auto">
-          {categories ? (
-           <table className="min-w-full divide-y divide-gray-200">
-           <thead className="border-b-[1.5px]">
-             <tr>
-               <th className="p-2 text-start text-sm font-semibold uppercase text-black">
-                 Category (UZ)
-               </th>
-               <th className="p-2 text-start text-sm font-semibold uppercase text-black">
-                 Category (RU)
-               </th>
-               <th className="p-2 text-start text-sm font-semibold uppercase text-black">
-                 Gender
-               </th>
-               <th className="p-2 text-center text-sm font-semibold uppercase text-black">
-                 Actions
-               </th>
-             </tr>
-           </thead>
-           <tbody className="divide-y divide-gray-200">
-             {['male', 'female', 'kids'].map(
-               (gender) =>
-                 categories[gender as keyof ApiResponse]?.map(
-                   (category, index) => (
-                     <tr
-                       onMouseLeave={() => {
-                         setIsAction('');
-                       }}
-                       onClick={() => viewCategoryProducts(category._id)}
-                       className="hover:bg-blue-50 transition-all duration-200 cursor-pointer border-y odd:bg-white even:bg-gray-50"
-                       key={`${category._id}-${index}`}
-                     >
-                       <td className="p-2">{category.name.uz}</td>
-                       <td className="p-2">{category.name.ru}</td>
-                       <td className="p-2">
-                         {gender.charAt(0).toUpperCase() + gender.slice(1)}
-                       </td>
-                       <td
-                         onClick={(e) => {
-                           e.stopPropagation();
-                           setIsAction(category._id);
-                         }}
-                         className="p-2 text-center whitespace-nowrap"
-                       >
-                         <button className="text-lg font-medium hover:underline text-blue-600">
-                           ...
-                         </button>
-                       </td>
-                       {isAction == category._id && (
-                         <ul className="absolute scale-110 right-18 border-[1.5px] rounded-md flex flex-col bg-white z-[10000]">
-                           <li className="text-start py-[.5px] px-2 hover:bg-blue-50 sm:table-cell whitespace-nowrap">
-                             <button
-                               className="text-sm font-medium text-blue-600 hover:underline"
-                               onClick={(e) => {
-                                 e.stopPropagation();
-                                return openEditModal(category);
-                               }}
-                             >
-                               Update
-                             </button>
-                           </li>
-                           <li className="text-center py-[.5px] px-2 hover:bg-red-50 whitespace-nowrap">
-                             <button
-                               className="text-sm font-medium text-red-600 hover:underline"
-                               onClick={(e) => {
-                                 e.stopPropagation();
-                                 deleteCategory(category._id);
-                                 setIsAction('');
-                                 return
-                               }}
-                             >
-                               Delete
-                             </button>
-                           </li>
-                         </ul>
-                       )}
-                       {/* <td className="p-2 text-center">
-                         <button
-                           onClick={() => openEditModal(category)}
-                           className="bg-yellow-500 text-white px-2 py-1 rounded mr-2 dark:bg-yellow-700"
-                         >
-                           Edit
-                         </button>
-                         <button
-                           onClick={() => deleteCategory(category._id)}
-                           className="bg-red-500 text-white px-2 py-1 rounded dark:bg-red-700"
-                         >
-                           Delete
-                         </button>
-                       </td> */}
-                     </tr>
-                   ),
-                 ),
-             )}
-           </tbody>
-         </table>
-          ) : (
-            <div className="min-h-[50vh] w-full sm:h-[60vh] lg:min-h-[70vh] flex justify-center items-center">
-              <div className="flex flex-col gap-2 md:gap-4 justify-center items-center">
-                <div className="w-full flex justify-center">
-                  <img src={notfound} alt="search box icon" className="" />
+        {!isLoading ? (
+          <div className="overflow-x-auto">
+            {Object.values(isSearch).flat().length > 0 ? (
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="border-b-[1.5px]">
+                  <tr>
+                    <th className="p-2 text-start text-sm font-semibold uppercase text-black">
+                      Category (UZ)
+                    </th>
+                    <th className="p-2 text-start text-sm font-semibold uppercase text-black">
+                      Category (RU)
+                    </th>
+                    <th className="p-2 text-start text-sm font-semibold uppercase text-black">
+                      Gender
+                    </th>
+                    <th className="p-2 text-center text-sm font-semibold uppercase text-black">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {['male', 'female', 'kids'].map(
+                    (gender) =>
+                      isSearch[gender as keyof ApiResponse]?.map(
+                        (category, index) => (
+                          <tr
+                            onMouseLeave={() => {
+                              setIsAction('');
+                            }}
+                            onClick={() => viewCategoryProducts(category._id)}
+                            className="hover:bg-blue-50 transition-all duration-200 cursor-pointer border-y odd:bg-white even:bg-gray-50"
+                            key={`${category._id}-${index}`}
+                          >
+                            <td className="p-2">{category.name.uz}</td>
+                            <td className="p-2">{category.name.ru}</td>
+                            <td className="p-2">
+                              {gender.charAt(0).toUpperCase() + gender.slice(1)}
+                            </td>
+                            <td
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsAction(category._id);
+                              }}
+                              className="p-2 text-center whitespace-nowrap"
+                            >
+                              <button className="text-lg font-medium hover:underline text-blue-600">
+                                ...
+                              </button>
+                            </td>
+                            {isAction == category._id && (
+                              <ul className="absolute scale-110 right-18 border-[1.5px] rounded-md flex flex-col bg-white z-[10000]">
+                                <li className="text-start py-[.5px] px-2 hover:bg-blue-50 sm:table-cell whitespace-nowrap">
+                                  <button
+                                    className="text-sm font-medium text-blue-600 hover:underline"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      return openEditModal(category);
+                                    }}
+                                  >
+                                    Update
+                                  </button>
+                                </li>
+                                <li className="text-center py-[.5px] px-2 hover:bg-red-50 whitespace-nowrap">
+                                  <button
+                                    className="text-sm font-medium text-red-600 hover:underline"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      deleteCategory(category._id);
+                                      setIsAction('');
+                                      return;
+                                    }}
+                                  >
+                                    Delete
+                                  </button>
+                                </li>
+                              </ul>
+                            )}
+                          </tr>
+                        ),
+                      ),
+                  )}
+                </tbody>
+              </table>
+            ) : (
+              <div className="min-h-[50vh] w-full sm:h-[60vh] lg:min-h-[70vh] flex justify-center items-center">
+                <div className="flex flex-col gap-2 md:gap-4 justify-center items-center">
+                  <div className="w-full flex justify-center">
+                    <img src={notfound} alt="search box icon" className="" />
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div role="status" className=" animate-pulse">
-          <div className="h-8 bg-gray-200 rounded-md  w-full mb-4"></div>
-          <div className="h-8 bg-gray-200 rounded-md  w-full mb-4"></div>
-          <div className="h-8 bg-gray-200 rounded-md  w-full mb-4"></div>
-          <div className="h-8 bg-gray-200 rounded-md  w-full mb-4"></div>
-          <div className="h-8 bg-gray-200 rounded-md  w-full mb-4"></div>
-          <div className="h-8 bg-gray-200 rounded-md  w-full mb-4"></div>
-          <div className="h-8 bg-gray-200 rounded-md  w-full mb-4"></div>
-          <div className="h-8 bg-gray-200 rounded-md  w-full mb-4"></div>
-          <div className="h-8 bg-gray-200 rounded-md  w-full mb-4"></div>
-          <span className="sr-only">Loading...</span>
-        </div>
-      )}
+            )}
+          </div>
+        ) : (
+          <div role="status" className=" animate-pulse">
+            <div className="h-8 bg-gray-200 rounded-md  w-full mb-4"></div>
+            <div className="h-8 bg-gray-200 rounded-md  w-full mb-4"></div>
+            <div className="h-8 bg-gray-200 rounded-md  w-full mb-4"></div>
+            <div className="h-8 bg-gray-200 rounded-md  w-full mb-4"></div>
+            <div className="h-8 bg-gray-200 rounded-md  w-full mb-4"></div>
+            <div className="h-8 bg-gray-200 rounded-md  w-full mb-4"></div>
+            <div className="h-8 bg-gray-200 rounded-md  w-full mb-4"></div>
+            <div className="h-8 bg-gray-200 rounded-md  w-full mb-4"></div>
+            <div className="h-8 bg-gray-200 rounded-md  w-full mb-4"></div>
+            <span className="sr-only">Loading...</span>
+          </div>
+        )}
       </div>
 
       {isModalOpen && editCategory && (

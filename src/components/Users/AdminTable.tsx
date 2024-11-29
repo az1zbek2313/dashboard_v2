@@ -1,4 +1,4 @@
-import React, { SetStateAction, useState } from 'react';
+import React, { SetStateAction, useEffect, useState } from 'react';
 import notfound from '../../images/notfound/notfound.png';
 
 interface Admin {
@@ -25,6 +25,21 @@ const AdminTable: React.FC<AdminTableProps> = ({
   openModal,
 }) => {
   const [isAction, setIsAction] = useState('');
+  const [selectAdmins, setSelectAdmins] = useState(admins);
+
+  function handleSelect(value:string) {
+   if (value == "all") {
+    setSelectAdmins(admins);
+   } else {
+    const filtered = admins.filter(items => items.role === value);
+    setSelectAdmins(filtered);
+   }
+    
+  }
+
+  useEffect(() => {
+    setSelectAdmins(admins)
+  }, [admins])
 
   return (
     <div
@@ -37,18 +52,31 @@ const AdminTable: React.FC<AdminTableProps> = ({
     >
       <div className="flex mb-6 justify-between items-center">
         <h4 className="text-3xl font-bold text-black/70">Adminlar</h4>
-        <button
-          onClick={() => {
-            openModal(true);
-          }}
-          className="bg-blue-500 text-white px-2 py-1 h-fit rounded"
-        >
-          Add User
-        </button>
+        <div className="flex gap-2 items-center">
+        <form className="">
+            <select
+              id="countries"
+              onChange={e => handleSelect(e.target.value)}
+              className="focus:outline-none cursor-pointer bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            >
+              <option value="all" selected>All admins</option>
+              <option value="store_admin">Store admins</option>
+              <option value="admin">Main admins</option>
+            </select>
+          </form>
+          <button
+            onClick={() => {
+              openModal(true);
+            }}
+            className="bg-blue-500 text-white px-2 py-2 h-fit rounded-lg"
+          >
+            Add User
+          </button>
+        </div>
       </div>
       {!isLoading ? (
         <div className="overflow-x-auto">
-          {admins ? (
+          {selectAdmins ? (
             <table className="min-w-full divide-y">
               <thead className="border-b-[1.5px]">
                 <tr>
@@ -67,7 +95,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-900">
-                {admins.map((admin) => (
+                {selectAdmins.map((admin) => (
                   <tr
                     onMouseLeave={() => {
                       setIsAction('');
