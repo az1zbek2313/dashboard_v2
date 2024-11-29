@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import SidebarLinkGroup from './SidebarLinkGroup';
-import Logo from '../../images/logo/logo.svg';
+import Logo from '../../images/Logotip/2.svg';
 import { useAuth } from '../../pages/Authentication/AuthContext';
 
 interface SidebarProps {
@@ -29,12 +29,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     { path: '/', label: 'Stores', roles: ['admin'] },
     { path: '/store', label: 'User stores', roles: ['store_admin'] },
     { path: '/user/product', label: 'Products', roles: ['store_admin'] },
-    { path: '/history', label: 'History', roles: ['admin'] },
     { path: '/categories', label: 'Category', roles: ['admin'] },
     { path: '/products', label: 'Products', roles: ['admin'] },
     { path: '/users', label: 'Users', roles: ['admin'] },
     { path: '/admins', label: 'Admins', roles: ['admin'] },
-    { path: '/category-filter', label: 'Filter category', roles: ['admin'] },
+    // { path: '/category-filter', label: 'Filter category', roles: ['admin'] },
   ];
 
   // Foydalanuvchining roli asosida yo'nalishlarni filtrlash
@@ -81,8 +80,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       className={`absolute left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
     >
-      <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
-        <NavLink to="/">
+      <div className="flex items-center justify-between gap-2 px-6  py-5.5 lg:pt-6.5">
+        <NavLink className="w-39 mx-auto" to="/">
           <img src={Logo} alt="Logo" />
         </NavLink>
 
@@ -109,7 +108,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         </button>
       </div>
       <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
-        <nav className="mt-5 py-4 px-4 lg:mt-9 lg:px-6">
+        <nav className="mt-5 py-4 px-4 lg:mt-4 lg:px-6">
           <div>
             <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
               MENU

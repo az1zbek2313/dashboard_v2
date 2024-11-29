@@ -18,6 +18,7 @@ const UserPage: React.FC = () => {
     const [currentUser, setCurrentUser] = useState<User | undefined>(undefined);
     const { token } = useAuth();
     const [modalOpen, setModalOpen] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [confirmationCode, setConfirmationCode] = useState<string>(''); // Tasdiqlash kodi
     const [isConfirmationSent, setIsConfirmationSent] = useState<boolean>(false); // Tasdiqlash yuborilganligini tekshirish
 
@@ -27,12 +28,14 @@ const UserPage: React.FC = () => {
                 headers: { token },
             });
             setUsers(response.data);
+            setIsLoading(false)
         } catch (error) {
             console.error('Error fetching users:', error);
         }
     };
 
     useEffect(() => {
+        setIsLoading(true)
         fetchUsers();
     }, [token]);
 
@@ -102,18 +105,10 @@ const UserPage: React.FC = () => {
     };
 
     return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-semibold mb-4">User Management</h1>
-
-            <button
-                onClick={openModal}
-                className="bg-blue-500 text-white p-2 rounded"
-            >
-                Add User
-            </button>
+        <div className="container mx-auto">         
 
             {modalOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white dark:bg-gray-800 dark:text-gray-200 p-4 rounded-lg w-1/3 shadow-lg">
                         <h2 className="text-xl mb-4 dark:text-white">
                             {currentUser ? 'Edit User' : 'Add User'}
@@ -216,7 +211,9 @@ const UserPage: React.FC = () => {
             <UserTable
                 users={users}
                 onEdit={handleEditUser}
+                isLoading={isLoading }
                 onDelete={handleDeleteUser}
+                openModal={openModal}
             />
         </div>
     );

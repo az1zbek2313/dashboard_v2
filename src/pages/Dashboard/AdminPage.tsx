@@ -15,6 +15,7 @@ interface Admin {
 
 const UserAdminPage: React.FC = () => {
     const [admins, setAdmins] = useState<Admin[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [currentAdmin, setCurrentAdmin] = useState<Admin | undefined>(undefined);
     const { token } = useAuth();
     const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -25,12 +26,14 @@ const UserAdminPage: React.FC = () => {
                 headers: { token },
             });
             setAdmins(response.data);
+            setIsLoading(false);
         } catch (error) {
             console.error('Error fetching admins:', error);
         }
     };
 
     useEffect(() => {
+        setIsLoading(true);
         fetchAdmins();
     }, [token]);
 
@@ -90,18 +93,10 @@ const UserAdminPage: React.FC = () => {
     };
 
     return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-semibold mb-4">Admin Management</h1>
-
-            <button
-                onClick={openModal}
-                className="bg-blue-500 text-white p-2 rounded"
-            >
-                Add Admin
-            </button>
-
+        <div className="container mx-auto">
+           
             {modalOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="fixed inset-0 flex z-[10000] items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white dark:bg-gray-800 dark:text-gray-200 p-4 rounded-lg w-1/3 shadow-lg">
                         <h2 className="text-xl mb-4 dark:text-white">
                             {currentAdmin ? 'Edit Admin' : 'Add Admin'}
@@ -185,6 +180,8 @@ const UserAdminPage: React.FC = () => {
                 admins={admins}
                 onEdit={handleEditAdmin}
                 onDelete={handleDeleteAdmin}
+                isLoading={isLoading }
+                openModal={openModal}
             />
         </div>
     );
