@@ -1,440 +1,678 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../Authentication/AuthContext';
+import CardSkeleton from './CardSkeleton';
+import notfound from '../../images/notfound/productnotfound.png';
 
 interface Product {
-    name: {
-        uz: string;
-        ru: string;
-    };
-    description: {
-        uz: string;
-        ru: string;
-    };
-    reviews: any[];
-    rating: number;
-    _id: string;
-    price: number;
-    images: string[];
-    count: number;
-    id_name: string;
-    __v: number;
+  name: {
+    uz: string;
+    ru: string;
+  };
+  description: {
+    uz: string;
+    ru: string;
+  };
+  reviews: any[];
+  rating: number;
+  _id: string;
+  price: number;
+  images: string[];
+  count: number;
+  id_name: string;
+  __v: number;
 }
 
 interface Category {
-    name: {
-        uz: string;
-        ru: string;
-    };
-    _id: string;
-    products: string[];
-    __v: number;
+  name: {
+    uz: string;
+    ru: string;
+  };
+  _id: string;
+  products: string[];
+  __v: number;
 }
 
 const StoreProduct: React.FC = () => {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-    const [modalOpen, setModalOpen] = useState(false);
-    const [uploadedFiles, setUploadedFiles] = useState([]);
+  const searchRef = useRef();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productId, setDeleteModal] = useState<string>("");
+  const [searchProduct, setSearchProduct] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
 
-    const { store_id, token } = useAuth();
+  const { store_id, token } = useAuth();
 
+  const [formData, setFormData] = useState<any>({
+    name: { uz: '', ru: '' },
+    description: { uz: '', ru: '' },
+    price: 0,
+    count: 0,
+    images: [],
+    category_id: '',
+    // store_id:""
+  });
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get(
+        `https://surprize.uz/api/store/${store_id}`,
+      );
+      setProducts(response.data.products);
+      setSearchProduct(response.data.products);
+    } catch (err) {
+      setError('Failed to fetch products');
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(
+          'https://surprize.uz/api/sub-category',
+        );
+        setCategories(response.data);
+      } catch (err) {
+        setError('Failed to fetch categories');
+      }
+    };
+    fetchProducts();
+    fetchCategories();
+  }, []);
 
-    const [formData, setFormData] = useState<any>({
+  function searchProducts() {
+    if (searchRef.current?.value == '') {
+      setSearchProduct(products);
+    } else {
+      const upperSearch = searchRef.current?.value?.toUpperCase();
+      if (upperSearch) {
+        const filterProducts = products.filter((product) =>
+          product.name.uz.toUpperCase().includes(upperSearch),
+        );
+        setSearchProduct(filterProducts);
+      }
+    }
+  }
+
+  useEffect(() => {
+    searchProducts();
+  }, [searchRef]);
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
+    const { name, value } = e.target;
+
+    if (name === 'price' || name === 'count') {
+      setFormData((prevData: any) => ({ ...prevData, [name]: Number(value) }));
+    } else if (name === 'category_id') {
+      setFormData((prevData: any) => ({ ...prevData, category_id: value }));
+    } else if (name === 'store_id') {
+      setFormData((prevData: any) => ({ ...prevData, store_id: value }));
+    } else {
+      const [key, lang] = name.split('.');
+      setFormData((prevData: any) => ({
+        ...prevData,
+        [key]: {
+          ...prevData[key],
+          [lang]: value,
+        },
+      }));
+    }
+  };
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files); // Fayllarni massivga aylantirish
+    if (files.length > 0) {
+      setUploadedFiles(files);
+    }
+  };
+
+  const createImageUrls = (files: File[]): string[] => {
+    return files.map((file) => URL.createObjectURL(file));
+  };
+
+  const appendImages = (newImages: string[]) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      images: [...prevData.images, ...newImages],
+    }));
+  };
+  const openModal = (product?: Product) => {
+    if (product) {
+      setSelectedProduct(product);
+      setFormData({
+        name: { uz: product.name?.uz, ru: product.name.ru },
+        description: {
+          uz: product.description?.uz,
+          ru: product.description.ru,
+        },
+        price: product.price,
+        count: product.count,
+        images: product.images,
+        category_id: product.category_id, // Assuming product has category_id
+        store_id: store_id, // Assuming product has category_id
+      });
+    } else {
+      setFormData({
         name: { uz: '', ru: '' },
         description: { uz: '', ru: '' },
         price: 0,
         count: 0,
         images: [],
         category_id: '',
-        // store_id:""
+        // store_id: ''
+      });
+    }
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedProduct(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const data = new FormData();
+    data.append('name_uz', formData.name?.uz);
+    data.append('name_ru', formData.name?.ru);
+    data.append('description_uz', formData.description?.uz);
+    data.append('description_ru', formData.description?.ru);
+    data.append('price', formData.price);
+    data.append('count', formData.count);
+    data.append('category_id', formData.category_id); // Append selected category ID
+    data.append('store_id', store_id); // Append selected store ID
+    uploadedFiles.forEach((file) => {
+      data.append('images', file); // Har bir faylni alohida qo'shish
     });
-    const fetchProducts = async () => {
-        try {
-            const response = await axios.get(`https://surprize.uz/api/store/${store_id}`);
-            setProducts(response.data.products);
-            console.log('response.data s:', response.data.products);
-        } catch (err) {
-            setError('Failed to fetch products');
-        } finally {
-            setLoading(false);
-        }
-    };
-    useEffect(() => {
+    for (let pair of data.entries()) {
+      console.log(`${pair[0]}: ${pair[1]}`);
+    }
+    try {
+      if (selectedProduct) {
+        console.log('Updating product...');
 
+        const response = await axios.put(
+          `https://surprize.uz/api/product/${selectedProduct._id}`,
+          data,
+          {
+            headers: {
+              token,
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        );
 
-        const fetchCategories = async () => {
-            try {
-                const response = await axios.get('https://surprize.uz/api/sub-category');
-                setCategories(response.data);
-            } catch (err) {
-                setError('Failed to fetch categories');
-            }
-        };
-        fetchProducts();
-        fetchCategories();
-    }, []);
+        console.log('Response:', response.data); // Qaytgan ma'lumotni konsolga chiqarish
+      } else {
+        console.log('Adding new product...');
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
+        const response = await axios.post(
+          'https://surprize.uz/api/product',
+          data,
+          {
+            headers: {
+              token,
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        );
 
-        if (name === "price" || name === "count") {
-            setFormData((prevData: any) => ({ ...prevData, [name]: Number(value) }));
-        } else if (name === "category_id") {
-            setFormData((prevData: any) => ({ ...prevData, category_id: value }));
-        } else if (name === "store_id") {
-            setFormData((prevData: any) => ({ ...prevData, store_id: value }));
-        } else {
-            const [key, lang] = name.split('.');
-            setFormData((prevData: any) => ({
-                ...prevData,
-                [key]: {
-                    ...prevData[key],
-                    [lang]: value,
-                },
-            }));
-        }
-    };
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = Array.from(e.target.files); // Fayllarni massivga aylantirish
-        if (files.length > 0) {
-            setUploadedFiles(files);
-        }
-    };
+        console.log('Response:', response.data); // Qaytgan ma'lumotni konsolga chiqarish
+      }
+      fetchProducts();
+      closeModal();
+    } catch (error) {
+      console.error('Error occurred:', error); // Xato haqida ma'lumotni konsolga chiqarish
+      setError('Error occurred while saving product');
+    }
+  };
 
+  const handleDelete = async (id: string) => {
+    try {
+      await axios.delete(`https://surprize.uz/api/product/${id}`, {
+        headers: { 'Content-Type': 'application/json', token },
+      });
+      fetchProducts();
+    } catch (error) {
+      setError('Error occurred while deleting product');
+    }
+  };
 
-    const createImageUrls = (files: File[]): string[] => {
-        return files.map((file) => URL.createObjectURL(file));
-    };
+  console.log(formData);
 
-    const appendImages = (newImages: string[]) => {
-        setFormData((prevData) => ({
-            ...prevData,
-            images: [...prevData.images, ...newImages],
-        }));
-    };
-    const openModal = (product?: Product) => {
-        if (product) {
-            setSelectedProduct(product);
-            setFormData({
-                name: { uz: product.name?.uz, ru: product.name.ru },
-                description: { uz: product.description?.uz, ru: product.description.ru },
-                price: product.price,
-                count: product.count,
-                images: product.images,
-                category_id: product.category_id, // Assuming product has category_id
-                store_id: store_id // Assuming product has category_id
-            });
-        } else {
-            setFormData({
-                name: { uz: '', ru: '' },
-                description: { uz: '', ru: '' },
-                price: 0,
-                count: 0,
-                images: [],
-                category_id: '',
-                // store_id: ''
-            });
-        }
-        setModalOpen(true);
-    };
-
-    const closeModal = () => {
-        setModalOpen(false);
-        setSelectedProduct(null);
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        const data = new FormData();
-        data.append('name_uz', formData.name?.uz);
-        data.append('name_ru', formData.name?.ru);
-        data.append('description_uz', formData.description?.uz);
-        data.append('description_ru', formData.description?.ru);
-        data.append('price', formData.price.toString());
-        data.append('count', formData.count.toString());
-        data.append('category_id', formData.category_id); // Append selected category ID
-        data.append('store_id', store_id); // Append selected store ID
-        uploadedFiles.forEach((file) => {
-            data.append('images', file); // Har bir faylni alohida qo'shish
-        });
-        for (let pair of data.entries()) {
-            console.log(`${pair[0]}: ${pair[1]}`);
-        }
-        try {
-            if (selectedProduct) {
-                console.log("Updating product...");
-
-                const response = await axios.put(`https://surprize.uz/api/product/${selectedProduct._id}`, data, {
-                    headers: {
-                        token,
-                        'Content-Type': 'multipart/form-data',
-                    }
-                });
-
-                console.log("Response:", response.data); // Qaytgan ma'lumotni konsolga chiqarish
-            } else {
-                console.log("Adding new product...");
-
-                const response = await axios.post('https://surprize.uz/api/product', data, {
-                    headers: {
-                        token,
-                        'Content-Type': 'multipart/form-data',
-                    }
-                });
-
-                console.log("Response:", response.data); // Qaytgan ma'lumotni konsolga chiqarish
-            }
-            fetchProducts();
-            closeModal();
-        } catch (error) {
-            console.error("Error occurred:", error); // Xato haqida ma'lumotni konsolga chiqarish
-            setError('Error occurred while saving product');
-        }
-
-    };
-
-    const handleDelete = async (id: string) => {
-        try {
-            await axios.delete(`https://surprize.uz/api/product/${id}`, {
-                headers: { 'Content-Type': 'application/json', token }
-            });
-            fetchProducts();
-        } catch (error) {
-            setError('Error occurred while deleting product');
-        }
-    };
-
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>{error}</div>;
-
+  if (loading)
     return (
-        <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
-            <button onClick={() => openModal()} className="bg-blue-500 text-white p-2 rounded">
-                Add Product
-            </button>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                {products.map((product) => (
-                    <div key={product._id} className="border rounded-lg p-4 shadow-md bg-white dark:bg-gray-800">
-                        <h2 className="text-xl font-semibold">{product.name?.uz}</h2>
-                        <p className="text-gray-600">{product.description?.uz}</p>
-                        <p className="text-lg font-bold">{`Price: $${product.price}`}</p>
-                        {product.images?.length > 0 && (
-                            <img
-                                src={'https://surprize.uz' + product.images[0]}
-                                alt={product.name?.uz}
-                                className="w-full h-64 rounded mt-2 object-cover"
-                            />
-                        )}
+      <div className="bg-white p-5 flex justify-center gap-5 items-center flex-wrap">
+        <CardSkeleton />
+        <CardSkeleton />
+        <CardSkeleton />
+      </div>
+    );
+  if (error) return <div>{error}</div>;
 
-                        <div className="mt-2">
-                            <span className="text-sm text-gray-500">{`Available Count: ${product.count}`}</span>
-                        </div>
-                        <button onClick={() => openModal(product)} className="bg-yellow-500 text-white p-1 rounded mt-2 mr-1">
-                            Edit
-                        </button>
-                        <button onClick={() => handleDelete(product._id)} className="bg-red-500 text-white p-1 rounded mt-2">
-                            Delete
-                        </button>
-                    </div>
-                ))}
+  return (
+    <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default">
+      <div className="flex mb-6 justify-between items-center flex-col gap-4 sm:flex-row">
+        <h4 className="text-3xl font-bold text-black/70">Mahsulotlar</h4>
+        <div className="flex items-center flex-col gap-4 sm:flex-row">
+          <form className="flex items-center max-w-sm mx-auto">
+            <label htmlFor="simple-search" className="sr-only">
+              Search
+            </label>
+            <div className="relative w-full">
+              <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                <svg
+                  className="w-4 h-4 text-gray-500"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 18 20"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    stroke-width="2"
+                    d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2"
+                  />
+                </svg>
+              </div>
+              <input
+                type="search"
+                ref={searchRef}
+                onChange={searchProducts}
+                id="simple-search"
+                className="bg-gray-50 border focus:outline-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5"
+                placeholder="Search products name..."
+                required
+              />
+            </div>
+          </form>
+
+          <button
+            onClick={() => openModal()}
+            className="bg-blue-500 text-white px-2 py-2  rounded-lg hover:bg-blue-600 active:bg-blue-400 transition-all duration-200"
+          >
+            Add Product
+          </button>
+        </div>
+      </div>
+      {searchProduct.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+          {searchProduct.map((product) => (
+            <div
+              key={product._id}
+              className="border rounded-lg px-3 pt-1 pb-2 shadow-md bg-white dark:bg-gray-800"
+            >
+              {product.images.length > 0 ? (
+                <img
+                  src={'https://surprize.uz' + product.images[0]}
+                  alt={product.name?.uz}
+                  className="w-full h-64 rounded mt-2 object-cover" // Tasvirning kengligi va balandligi 256px bo'ladi
+                />
+              ) : (
+                <div
+                  role="status"
+                  className="flex items-center justify-center h-56 max-w-sm bg-gray-300 rounded-lg animate-pulse dark:bg-gray-700"
+                >
+                  <svg
+                    className="w-10 h-10 text-gray-200 dark:text-gray-600"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 16 20"
+                  >
+                    <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z" />
+                    <path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2ZM9 13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2Zm4 .382a1 1 0 0 1-1.447.894L10 13v-2l1.553-1.276a1 1 0 0 1 1.447.894v2.764Z" />
+                  </svg>
+                  <span className="sr-only">Loading...</span>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between w-full">
+                <h2 className="text-xl font-semibold my-2 text-black">
+                  {product.name?.uz}
+                </h2>
+                <div className="flex items-center gap-2">
+                  <svg
+                    onClick={() => openModal(product)}
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    fill="currentColor"
+                    color="blue"
+                    className="bi bi-pencil-square cursor-pointer hover:scale-105 transition-all duration-200"
+                    viewBox="0 0 16 16"
+                  >
+                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                    <path
+                      fill-rule="evenodd"
+                      d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"
+                    />
+                  </svg>
+                  <svg
+                    onClick={() => {setDeleteModal(product._id)}}
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    fill="currentColor"
+                    color="red"
+                    className="bi bi-trash3-fill cursor-pointer hover:scale-105 transition-all duration-200"
+                    viewBox="0 0 16 16"
+                  >
+                    <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5" />
+                  </svg>
+                </div>
+              </div>
+              <div className="mt-2">
+                <span className="text-sm text-gray-500 font-semibold">{`Description: `}</span>
+                <span className="text-sm text-gray-500">{`${product.description?.uz}`}</span>
+              </div>
+
+              <div className="mt-2">
+                <span className="text-sm text-gray-500 font-semibold">{`Price: `}</span>
+                <span className="text-sm text-gray-500">${product.price}</span>
+              </div>
+
+              <div className="mt-2">
+                <span className="text-sm text-gray-500 font-semibold">{`Available Count: `}</span>
+                <span className="text-sm text-gray-500">{product.count}</span>
+              </div>
+
+              <div className="mt-2">
+                <span className="text-sm text-gray-500 font-semibold">{`Category: `}</span>
+                <span className="text-sm text-gray-500">
+                  {product.category}
+                </span>
+              </div>
+
+              <div className="mt-2">
+                <span className="text-sm text-gray-500 font-semibold">{`Gender: `}</span>
+                <span className="text-sm text-gray-500">{product.gender}</span>
+              </div>
+
+              <div className="mt-2">
+                <span className="text-sm text-gray-500 font-semibold">{`Product ID: `}</span>
+                <span className="text-sm text-gray-500">{product._id}</span>
+              </div>
+
+              <div className="mt-2">
+                <span className="text-sm text-gray-500 font-semibold">{`Store ID: `}</span>
+                <span className="text-sm text-gray-500">{product.store}</span>
+              </div>
+
+              <div className="mt-2">
+                <span className="text-sm text-gray-500 font-semibold">{`Reviews: `}</span>
+                <span className="text-sm text-gray-500">{product.rating}</span>
+              </div>
+
+              <div className="mt-2">
+                <span className="text-sm text-gray-500 font-semibold">{`Review: `}</span>
+                <span className="text-sm text-gray-500">
+                  {product.reviews.length} review(s)
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="min-h-[50vh] w-full sm:h-[60vh] lg:min-h-[70vh] flex justify-center items-center">
+          <div className="flex flex-col gap-2 md:gap-4 justify-center items-center">
+            <div className="w-full flex justify-center">
+              <img src={notfound} alt="search box icon" className="" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {modalOpen && (
+        <div className="fixed inset-0 flex z-9999 items-center justify-center bg-black bg-opacity-50">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white dark:bg-gray-800 rounded-lg p-4 w-1/3 overflow-auto max-h-[80vh] scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200"
+            encType="multipart/form-data"
+          >
+            <h2 className="text-2xl mb-4">
+              {selectedProduct ? 'Edit Product' : 'Add Product'}
+            </h2>
+            <div>
+              <label className="block mb-2">Name (UZ):</label>
+              <input
+                type="text"
+                name="name.uz"
+                value={formData.name?.uz}
+                onChange={handleChange}
+                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
+                required
+              />
+            </div>
+            <div>
+              <label className="block mb-2">Name (RU):</label>
+              <input
+                type="text"
+                name="name.ru"
+                value={formData.name.ru}
+                onChange={handleChange}
+                required
+                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block mb-2">Description (UZ):</label>
+              <textarea
+                name="description.uz"
+                value={formData.description?.uz}
+                required
+                onChange={handleChange}
+                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block mb-2">Description (RU):</label>
+              <textarea
+                name="description.ru"
+                required
+                value={formData.description.ru}
+                onChange={handleChange}
+                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block mb-2">Price:</label>
+              <input
+                type="text"
+                required
+                name="price"
+                value={formData.price}
+                onChange={handleChange}
+                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block mb-2">Count:</label>
+              <input
+                type="text"
+                required
+                name="count"
+                value={formData.count}
+                onChange={handleChange}
+                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
+              />
             </div>
 
-            {modalOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <form
-                        onSubmit={handleSubmit}
-                        className="bg-white dark:bg-gray-800 rounded-lg p-4 w-1/3 overflow-auto max-h-[80vh] scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200"
-                        encType="multipart/form-data"
-                    >
-                        <h2 className="text-2xl mb-4">{selectedProduct ? 'Edit Product' : 'Add Product'}</h2>
-                        <div>
-                            <label className="block mb-2">Name (UZ):</label>
-                            <input
-                                type="text"
-                                name="name.uz"
-                                value={formData.name?.uz}
-                                onChange={handleChange}
-                                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
-                                required
+            <div>
+              <label className="block mb-2">Category:</label>
+              <select
+                required
+                name="category_id"
+                value={formData.category_id}
+                defaultValue={formData.category_id}
+                onChange={handleChange}
+                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
+              >
+                <option value="">Select Category</option>
 
-                            />
-                        </div>
-                        <div>
-                            <label className="block mb-2">Name (RU):</label>
-                            <input
-                                type="text"
-                                name="name.ru"
-                                value={formData.name.ru}
-                                onChange={handleChange}
-                                required
-                                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
-                            />
-                        </div>
-                        <div>
-                            <label className="block mb-2">Description (UZ):</label>
-                            <textarea
-                                name="description.uz"
-                                value={formData.description?.uz}
-                                required
-                                onChange={handleChange}
-                                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
-                            />
-                        </div>
-                        <div>
-                            <label className="block mb-2">Description (RU):</label>
-                            <textarea
-                                name="description.ru"
-                                required
-                                value={formData.description.ru}
-                                onChange={handleChange}
-                                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
-                            />
-                        </div>
-                        <div>
-                            <label className="block mb-2">Price:</label>
-                            <input
-                                type="text"
-                                required
-                                name="price"
-                                // value={formData.price}
-                                onChange={handleChange}
-                                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
-                            />
-                        </div>
-                        <div>
-                            <label className="block mb-2">Count:</label>
-                            <input
-                                type="text"
-                                required
-                                name="count"
-                                // value={formData.count}
-                                onChange={handleChange}
-                                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
-                            />
-                        </div>
+                {/* Male Categories */}
+                <optgroup label="Male">
+                  {categories
+                    .filter((category) => category.gender.includes('male'))
+                    .map((category) => (
+                      <option key={category._id} value={category._id}>
+                        {category.name?.uz}
+                      </option>
+                    ))}
+                </optgroup>
 
+                {/* Female Categories */}
+                <optgroup label="Female">
+                  {categories
+                    .filter((category) => category.gender.includes('female'))
+                    .map((category) => (
+                      <option key={category._id} value={category._id}>
+                        {category.name?.uz}
+                      </option>
+                    ))}
+                </optgroup>
 
+                {/* Kids Categories */}
+                <optgroup label="Kids">
+                  {categories
+                    .filter((category) => category.gender.includes('kids'))
+                    .map((category) => (
+                      <option key={category._id} value={category._id}>
+                        {category.name?.uz}
+                      </option>
+                    ))}
+                </optgroup>
+              </select>
+            </div>
 
-                        <div>
-                            <label className="block mb-2">Category:</label>
-                            <select
-                                required
-                                name="category_id"
-                                value={formData.category_id}
-                                onChange={handleChange}
-                                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
-                            >
-                                <option value="">Select Category</option>
-
-                                {/* Male Categories */}
-                                <optgroup label="Male">
-                                    {categories
-                                        .filter(category => category.gender.includes("male"))
-                                        .map(category => (
-                                            <option key={category._id} value={category._id}>
-                                                {category.name?.uz}
-                                            </option>
-                                        ))}
-                                </optgroup>
-
-                                {/* Female Categories */}
-                                <optgroup label="Female">
-                                    {categories
-                                        .filter(category => category.gender.includes("female"))
-                                        .map(category => (
-                                            <option key={category._id} value={category._id}>
-                                                {category.name?.uz}
-                                            </option>
-                                        ))}
-                                </optgroup>
-
-                                {/* Kids Categories */}
-                                <optgroup label="Kids">
-                                    {categories
-                                        .filter(category => category.gender.includes("kids"))
-                                        .map(category => (
-                                            <option key={category._id} value={category._id}>
-                                                {category.name?.uz}
-                                            </option>
-                                        ))}
-                                </optgroup>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block mb-2">Images:</label>
-                            <input
-                                type="file"
-                                required
-                                accept="image/*"
-                                multiple
-                                onChange={handleImageChange}
-                                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
-                            />
-                        </div>
-                        <div className="mt-2">
-                            <h3 className="text-lg font-semibold">Selected Images:</h3>
-                            <div className="flex flex-wrap mt-2">
-                                {formData.images.map((image: string, index: number) => (
-                                    <img key={index} src={image} alt={`Selected ${index}`} className="w-16 h-16 object-cover mr-2" />
-                                ))}
-                            </div>
-                        </div>
-                        <div className="flex justify-end mt-4">
-                            <button type="button" onClick={closeModal} className="bg-gray-300 dark:bg-gray-600 p-2 rounded mr-2">
-                                Cancel
-                            </button>
-                            <button type="submit" className="bg-blue-500 dark:bg-blue-600 text-white p-2 rounded">
-                                {selectedProduct ? 'Update Product' : 'Add Product'}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
+            <div>
+              <label className="block mb-2">Images:</label>
+              <input
+                type="file"
+                required
+                accept="image/*"
+                multiple
+                onChange={handleImageChange}
+                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+            <div className="mt-2">
+              <h3 className="text-lg font-semibold">Selected Images:</h3>
+              <div className="flex flex-wrap mt-2">
+                {formData.images.map((image: string, index: number) => (
+                  <img
+                    key={index}
+                    src={`https://surprize.uz` + image}
+                    alt={`Selected ${index}`}
+                    className="w-16 h-16 object-cover mr-2"
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end mt-4">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="bg-gray-300 dark:bg-gray-600 p-2 rounded mr-2"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="bg-blue-500 dark:bg-blue-600 text-white p-2 rounded"
+              >
+                {selectedProduct ? 'Update Product' : 'Add Product'}
+              </button>
+            </div>
+          </form>
         </div>
-    );
+      )}
+
+
+      
+     {
+        products.some(product => product._id === productId) && 
+        <div
+        id="popup-modal"
+        tabIndex={-1}
+        className="overflow-y-auto bg-black/30 flex z-9999 fixed top-0 right-0 left-0 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+      >
+        <div className="relative p-4 w-full max-w-md max-h-full">
+          <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <button
+            onClick={() => {setDeleteModal("")}}
+              type="button"
+              className="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+              data-modal-hide="popup-modal"
+            >
+              <svg
+                className="w-3 h-3"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 14 14"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                />
+              </svg>
+              <span className="sr-only">Close modal</span>
+            </button>
+            <div className="p-4 md:p-5 text-center">
+              <svg
+                className="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                />
+              </svg>
+              <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+                Are you sure you want to delete this product?
+              </h3>
+              <button
+                data-modal-hide="popup-modal"
+                type="button"
+                onClick={() => handleDelete(productId)}
+                className="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center"
+              >
+                Yes, I'm sure
+              </button>
+              <button
+              onClick={() => {setDeleteModal("")}}
+                data-modal-hide="popup-modal"
+                type="button"
+                className="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+              >
+                No, cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+     }
+    </div>
+  );
 };
 
 export default StoreProduct;
-
-
-
-
-                        {/* <div>
-                            <label className="block mb-2">Category:</label>
-                            <select
-                                required
-                                name="category_id"
-                                value={formData.category_id}
-                                onChange={handleChange}
-                                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
-                            >
-                                <option value="">Select Category</option>
-                                {categories.map(category => (
-                                    <option key={category._id} value={category._id}>
-                                        {category.name?.uz}
-                                    </option>
-                                ))}
-                            </select>
-                        </div> */}
-                        {/* <div>
-                            <label className="block mb-2">Store:</label>
-                            <select
-                                required
-                                name="store_id"
-                                value={formData.store_id}
-                                onChange={handleChange}
-                                className="border rounded p-2 w-full dark:bg-gray-700 dark:text-white"
-                            >
-                                <option value="">Select Store</option>
-                                {store.map(store => (
-                                    <option key={store._id} value={store._id}>
-                                        {store.name?.uz}
-                                    </option>
-                                ))}
-                            </select>
-                        </div> */}

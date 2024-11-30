@@ -108,8 +108,6 @@ const Products: React.FC = () => {
     searchProducts();
   }, [searchRef]);
 
-  console.log(searchRef);
-
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -242,7 +240,7 @@ const Products: React.FC = () => {
 
   if (loading)
     return (
-      <div className="bg-white p-5 flex justify-between items-center">
+      <div className="bg-white p-5 flex justify-center gap-5 items-center flex-wrap">
         <CardSkeleton />
         <CardSkeleton />
         <CardSkeleton />

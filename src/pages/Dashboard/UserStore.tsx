@@ -47,7 +47,6 @@ const UserStore: React.FC = () => {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Store Admin</h1>
       <UserStoreAdmin storeData={storeData} onUpdateStore={handleUpdateStore} getData={fetchStoreData} />
     </div>
   );
