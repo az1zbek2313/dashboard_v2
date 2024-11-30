@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../Authentication/AuthContext';
 import CardSkeleton from './CardSkeleton';
+import notfound from '../../images/notfound/productnotfound.png';
 
 interface Product {
   name: {
@@ -296,6 +297,7 @@ const Products: React.FC = () => {
           </button>
         </div>
       </div>
+      {searchProduct.length > 0 ? 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
         {searchProduct.map((product) => (
           <div
@@ -409,8 +411,17 @@ const Products: React.FC = () => {
               </span>
             </div>
           </div>
-        ))}
+        ))
+        }
       </div>
+      :
+      <div className="min-h-[50vh] w-full sm:h-[60vh] lg:min-h-[70vh] flex justify-center items-center">
+                <div className="flex flex-col gap-2 md:gap-4 justify-center items-center">
+                  <div className="w-full flex justify-center">
+                    <img src={notfound} alt="search box icon" className="" />
+                  </div>
+                </div>
+              </div>}
 
       {modalOpen && (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black bg-opacity-50">
