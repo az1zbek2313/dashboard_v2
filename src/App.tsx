@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import Loader from './common/Loader';
@@ -48,19 +47,27 @@ function App() {
         <Route
           path="/auth/signin"
           element={
-            isAuthenticated ? <Navigate to="/" /> : <>
-              <PageTitle title="Signin | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <SignIn />
-            </>
+            isAuthenticated ? (
+              <Navigate to="/" />
+            ) : (
+              <>
+                <PageTitle title="Signin | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <SignIn />
+              </>
+            )
           }
         />
         <Route
           path="/auth/signup"
           element={
-            isAuthenticated ? <Navigate to="/" /> : <>
-              <PageTitle title="Signup | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <SignUp />
-            </>
+            isAuthenticated ? (
+              <Navigate to="/" />
+            ) : (
+              <>
+                <PageTitle title="Signup | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <SignUp />
+              </>
+            )
           }
         />
 
@@ -74,28 +81,19 @@ function App() {
               </DefaultLayout>
             </ProtectedRoute>
           }
-          />
-             <Route
+        />
+        <Route
           path="/storeid/:id"
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <DefaultLayout>
                 {/* <ECommerce /> */}
-                <StoreById/>
+                <StoreById />
               </DefaultLayout>
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/store"
-          element={
-            <ProtectedRoute allowedRoles={['store_admin']}>
-              <DefaultLayout>
-                <UserStore />
-              </DefaultLayout>
-            </ProtectedRoute>
-          }
-        />
+
         <Route
           path="/categories"
           element={
@@ -127,16 +125,6 @@ function App() {
           }
         />
         <Route
-          path="/user/product"
-          element={
-            <ProtectedRoute allowedRoles={['store_admin']}>
-              <DefaultLayout>
-                <StoreProduct />
-              </DefaultLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/product/:id"
           element={
             <ProtectedRoute allowedRoles={['admin']}>
@@ -155,8 +143,8 @@ function App() {
               </DefaultLayout>
             </ProtectedRoute>
           }
-          />
-              <Route
+        />
+        <Route
           path="/userbyid/:id"
           element={
             <ProtectedRoute allowedRoles={['admin']}>
@@ -192,6 +180,26 @@ function App() {
             <ProtectedRoute allowedRoles={['admin']}>
               <DefaultLayout>
                 <CategoryFilter />
+              </DefaultLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/store"
+          element={
+            <ProtectedRoute allowedRoles={['store_admin']}>
+              <DefaultLayout>
+                <UserStore />
+              </DefaultLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user/product"
+          element={
+            <ProtectedRoute allowedRoles={['store_admin']}>
+              <DefaultLayout>
+                <StoreProduct />
               </DefaultLayout>
             </ProtectedRoute>
           }

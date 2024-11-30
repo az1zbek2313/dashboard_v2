@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import TableOne from '../../components/Tables/TableOne';
 import { useAuth } from '../Authentication/AuthContext';
 import UserStoreAdmin from '../../components/Tables/UserStoreTable';
 
@@ -30,6 +29,8 @@ const UserStore: React.FC = () => {
         headers: { token },
       });
       setStoreData([response.data]);
+      console.log(32, storeData);
+      
     } catch (error) {
       console.error('Error fetching store data:', error);
     }

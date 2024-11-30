@@ -53,6 +53,8 @@ const UserById: React.FC = () => {
     localStorage.setItem('darkMode', newDarkMode.toString()); // Dark mode holatini saqlash
   };
 
+  console.log(56, userData);
+
   if (loading) return <p>Yuklanmoqda...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
@@ -133,15 +135,71 @@ const UserById: React.FC = () => {
         </div>
       </section>
 
-      <h5 className="text-lg px-12 font-semibold text-black dark:text-white">
+      <h5 className="text-lg px-12 font-semibold text-black">
         Buyurtmalar: {userData?.orders.length} ta
       </h5>
-      <ul className='px-12'>
+      <ul className="px-12">
         {userData?.orders.length ? (
-          userData?.orders.map((orderId, index) => (
-            <li key={orderId} className="text-gray-700 dark:text-gray-300">
-              <span className='font-semibold'>Buyurtma ID: {index+1}{")"}</span>  {orderId}
-            </li>
+          userData?.orders.map((orderId) => (
+            <div
+              key={orderId}
+              className="flex flex-wrap items-center xs:gap-y-4 border-b-[1.5px] odd:bg-gray-2 border-gray-200 py-4 pb-4 dark:border-gray-700 md:py-5"
+            >
+              <dl className="w-full sm:w-1/2">
+                <dt className="text-base font-medium text-gray-500">
+                  Order ID:
+                </dt>
+                <dd className="mt-1.5 text-base font-semibold text-gray-900">
+                  <a href="#" className="hover:underline">
+                    #{orderId}
+                  </a>
+                </dd>
+              </dl>
+
+              <dl className="w-full xs:w-1/3 sm:w-1/4 md:flex-1 lg:w-auto">
+                <dt className="text-base font-medium text-gray-500">
+                  Date:
+                </dt>
+                <dd className="mt-1.5 text-base font-semibold text-gray-900">
+                  10.11.2024
+                </dd>
+              </dl>
+
+              <dl className="w-full xs:w-1/3 sm:w-1/5 md:flex-1 lg:w-auto">
+                <dt className="text-base font-medium text-gray-500">
+                  Price:
+                </dt>
+                <dd className="mt-1.5 text-base font-semibold text-gray-900">
+                  $3,287
+                </dd>
+              </dl>
+
+              <dl className="w-full xs:w-1/3 sm:w-1/4 sm:flex-1 lg:w-auto">
+                <dt className="text-base font-medium text-gray-500">
+                  Status:
+                </dt>
+                <dd className="mt-1.5 inline-flex items-center rounded bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-300">
+                  <svg
+                    className="me-1 h-3 w-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 11.917 9.724 16.5 19 7.5"
+                    ></path>
+                  </svg>
+                  Completed
+                </dd>
+              </dl>
+            </div>
           ))
         ) : (
           <li className="text-gray-700 dark:text-gray-300">
