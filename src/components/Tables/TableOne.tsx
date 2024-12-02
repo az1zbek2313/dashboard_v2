@@ -195,7 +195,7 @@ const TableOne: React.FC<TableOneProps> = ({
             <div className="overflow-x-auto">
               {isSearch.length ? (
                 <table className="min-w-full divide-y">
-                  <thead className="border-b-[1.5px]">
+                  <thead className="border-b border-gray-300">
                     <tr>
                       <th className="p-2 text-left text-sm font-semibold uppercase text-black">
                         Nomi
@@ -214,7 +214,7 @@ const TableOne: React.FC<TableOneProps> = ({
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 ">
+                  <tbody className="divide-y divide-gray-300 ">
                     {isSearch.map((store) => (
                       <tr
                         onMouseLeave={() => {
@@ -224,7 +224,7 @@ const TableOne: React.FC<TableOneProps> = ({
                           navigate(`/storeid/{${store._id}}`);
                         }}
                         key={store._id}
-                        className="hover:bg-blue-50 cursor-pointer odd:bg-white even:bg-gray-50"
+                        className="hover:bg-red-50  transition-all duration-200 cursor-pointer odd:bg-white even:bg-blue-50"
                       >
                         <td className="flex items-center gap-3 p-2 text-sm text-black whitespace-nowrap">
                           <img
@@ -395,7 +395,7 @@ const TableOne: React.FC<TableOneProps> = ({
           <button
             type="button"
             onClick={() => setIsEditMode(false)}
-            className="mt-4 p-2 bg-gray-400 text-white rounded-md"
+            className="mt-4 p-2 bg-gray-300 text-white rounded-md"
           >
             Bekor qilish
           </button>

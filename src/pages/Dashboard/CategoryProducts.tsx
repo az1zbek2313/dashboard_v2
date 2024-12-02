@@ -43,7 +43,7 @@ const CategoryProducts: React.FC = () => {
            {
             products.length > 0 ?
             <table className="w-full table-auto">
-            <thead className="border-b-[1.5px]">
+            <thead className="border-b border-gray-300">
               <tr>
                 <th className="px-3 py-3 text-left text-sm font-medium text-black uppercase xsm:text-base">
                   Images
@@ -59,17 +59,17 @@ const CategoryProducts: React.FC = () => {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y-[1.5px]">
+            <tbody className="divide-y divide-gray-300">
               {products.map((product) => (
                 <tr
                   key={product._id}
-                  className="odd:bg-white even:bg-gray-50"
+                  className=" odd:bg-white even:bg-blue-50"
                 >
-                  <td className="p-3 text-sm">
+                  <td className="p-2 text-sm">
                     <img
                       src={`https://surprize.uz${product.images[0]}`}
                       alt={product.name.uz}
-                      className="w-16 h-16 rounded-full object-cover"
+                      className="w-16 h-16 rounded object-cover"
                     />
                   </td>
                   <td className="p-3 text-black/70 font-medium">

@@ -46,8 +46,8 @@ const UserTable: React.FC<UserTableProps> = ({
       {!isLoading ? (
         <div className="overflow-x-auto">
           {users ? (
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="border-b-[1.5px]">
+            <table className="min-w-full divide-y divide-gray-300">
+              <thead className="border-b border-gray-300">
                 <tr>
                   <th className="p-2 text-left text-sm font-semibold uppercase text-black">
                     Nomi
@@ -66,14 +66,14 @@ const UserTable: React.FC<UserTableProps> = ({
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 ">
+              <tbody className="divide-y divide-gray-300 ">
                 {users
                 .sort((a, b) => b.orders.length - a.orders.length)
                 .map((user) => (
                   <tr
                     key={user._id}
                     onClick={() => {navigate(`/userbyid/${user._id}`)}}
-                    className="hover:bg-blue-50 cursor-pointer odd:bg-white even:bg-gray-50"
+                    className="hover:bg-red-50  transition-all duration-200 cursor-pointer odd:bg-white even:bg-blue-50"
                   >
                     <td className="p-2 font-medium text-left text-sm text-gray-700 dark:text-gray-300">
                       {user.name}

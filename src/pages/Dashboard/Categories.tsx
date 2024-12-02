@@ -263,7 +263,7 @@ const Categories: React.FC = () => {
                   onClick={() => {
                     setIsModalOpenTwo(false);
                   }}
-                  className="bg-gray-300 dark:bg-gray-700 dark:text-gray-200 p-2 rounded mr-2"
+                  className="bg-gray-300"
                 >
                   Cancel
                 </button>
@@ -284,8 +284,8 @@ const Categories: React.FC = () => {
         {!isLoading ? (
           <div className="overflow-x-auto">
             {Object.values(isSearch).flat().length > 0 ? (
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="border-b-[1.5px]">
+              <table className="min-w-full">
+                <thead className="border-b">
                   <tr>
                     <th className="p-2 text-start text-sm font-semibold uppercase text-black">
                       Category (UZ)
@@ -301,7 +301,7 @@ const Categories: React.FC = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y">
                   {['male', 'female', 'kids'].map(
                     (gender) =>
                       isSearch[gender as keyof ApiResponse]?.map(
@@ -311,7 +311,7 @@ const Categories: React.FC = () => {
                               setIsAction('');
                             }}
                             onClick={() => viewCategoryProducts(category._id)}
-                            className="hover:bg-blue-50 transition-all duration-200 cursor-pointer border-y odd:bg-white even:bg-gray-50"
+                            className="hover:bg-red-50 border-gray-300  transition-all duration-200 cursor-pointer border-y odd:bg-white even:bg-blue-50"
                             key={`${category._id}-${index}`}
                           >
                             <td className="p-2">{category.name.uz}</td>

@@ -78,7 +78,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
         <div className="overflow-x-auto">
           {selectAdmins ? (
             <table className="min-w-full divide-y">
-              <thead className="border-b-[1.5px]">
+              <thead className="border-b border-gray-300">
                 <tr>
                   <th className="p-2 text-left text-sm font-semibold uppercase text-gray-700">
                     Name
@@ -94,14 +94,14 @@ const AdminTable: React.FC<AdminTableProps> = ({
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white dark:bg-gray-900">
+              <tbody className="bg-white">
                 {selectAdmins.map((admin) => (
                   <tr
                     onMouseLeave={() => {
                       setIsAction('');
                     }}
                     key={admin._id}
-                    className="border-b border-gray-200 odd:bg-white even:bg-gray-50"
+                    className="border-b border-gray-300 odd:bg-white even:bg-blue-50"
                   >
                     <td className="p-2 text-left font-medium text-gray-700">
                       {admin.name}
