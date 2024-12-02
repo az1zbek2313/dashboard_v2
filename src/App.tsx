@@ -19,6 +19,8 @@ import StoreProduct from './pages/Dashboard/StoreProduct';
 import CategoryFilter from './pages/Dashboard/CategoryFilter';
 import StoreById from './pages/Dashboard/StoreById';
 import UserById from './pages/Dashboard/UserById';
+import MyOffers from './pages/Dashboard/MyOffers';
+import MyProductComments from './pages/Dashboard/MyProductComments';
 // import { AuthProvider, useAuth } from './AuthContext';
 // import ProtectedRoute from './ProtectedRoute';
 
@@ -200,6 +202,26 @@ function App() {
             <ProtectedRoute allowedRoles={['store_admin']}>
               <DefaultLayout>
                 <StoreProduct />
+              </DefaultLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/myoffers"
+          element={
+            <ProtectedRoute allowedRoles={['store_admin']}>
+              <DefaultLayout>
+                <MyOffers />
+              </DefaultLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/myproducts/comments"
+          element={
+            <ProtectedRoute allowedRoles={['store_admin']}>
+              <DefaultLayout>
+                <MyProductComments />
               </DefaultLayout>
             </ProtectedRoute>
           }

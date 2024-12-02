@@ -29,6 +29,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     { path: '/', label: 'Stores', roles: ['admin'] },
     { path: '/store', label: 'User stores', roles: ['store_admin'] },
     { path: '/user/product', label: 'Products', roles: ['store_admin'] },
+    { path: '/myoffers', label: 'My Offers', roles: ['store_admin'] },
+    { path: '/myproducts/comments', label: 'My Comments', roles: ['store_admin'] },
     { path: '/categories', label: 'Category', roles: ['admin'] },
     { path: '/products', label: 'Products', roles: ['admin'] },
     { path: '/users', label: 'Users', roles: ['admin'] },
